@@ -9,7 +9,7 @@
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-**[🇺🇸 English](README.md) • [🇷🇺 Русский (Полная документация)](README_RU.md) • [🌍 Руководство по карте](README_MAP_RU.md)**
+
 
 <p align="center">
   <strong>«Hear Earth. Decode the Signal.»</strong><br>
@@ -237,11 +237,6 @@ THE RECEIVER features an adaptive layout calibrated for:
 * **Laptops & Desktops** ($1280\times720 \dots 1920\times1080$): Full HUD frame with integrated spectrogram, side dashboard, and camera controls.
 * **Ultra-Wide & 4K Displays** ($> 1920\text{px}$): High-density telemetry displays with uncompressed layouts.
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
