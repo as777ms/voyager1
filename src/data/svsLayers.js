@@ -90,9 +90,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'VIIRS_Black_Marble_Nighttime_Lights_2016',
     gibsDefaultDate: '2016-01-01',
     description:
-      'EIC Change in Night Lights (2012–2023): тёмный фон = океаны и леса, золотой/фиолетовый = рост городов и энергосетей.',
+      'EIC Change in Night Lights (2012–2023): dark background = oceans and forests, gold/violet = urban growth and power grids.',
     audioLegendSummary:
-      'Тёмно-синий фон звучит тихо; яркие огни мегаполисов запускают звёздное пианино и ритмическую плотность.',
+      'Deep blue oceans play quietly; bright megacity corridors trigger starry piano notes and rhythmic pulse density.',
     paletteStops: [
       { t: 0.0, rgb: [8, 14, 34], hex: '#080e22', label: 'Dark Sky (0)' },
       { t: 0.35, rgb: [128, 78, 28], hex: '#804e1c', label: 'Towns (40)' },
@@ -127,9 +127,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'MOPITT_CO_Monthly_Total_Column_Day',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Угарный газ от лесных пожаров Амазонии, Африки и промышленных шлейфов Азии (SVS #5153 / Air Quality #5533).',
+      'Carbon monoxide from Amazon and African wildfires plus Asian industrial plumes (SVS #5153 / Air Quality #5533).',
     audioLegendSummary:
-      'Красные очаги CO дают глубокий плотный бас (C1–E2) и высокую громкость (velocity 100–127).',
+      'Crimson CO hotspots drive a deep, dense bass (C1–E2) with high velocity (100–127).',
     paletteStops: [
       { t: 0.0, rgb: [255, 245, 195], hex: '#fff5c3', label: 'Baseline (40)' },
       { t: 0.35, rgb: [253, 187, 74], hex: '#fdbb4a', label: 'Moderate (150)' },
@@ -163,9 +163,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Западные пограничные течения (Гольфстрим, Куросио) и температура поверхности океана (SVS #3912 и #5425).',
+      'Western boundary currents (Gulf Stream, Kuroshio) and sea surface temperature dynamics (SVS #3912 & #5425).',
     audioLegendSummary:
-      'Полярная вода звучит высокими ледяными тонами, тёплые экваториальные течения открывают мягкий глубокий фильтр.',
+      'Polar waters shimmer with high icy tones, while warm equatorial currents open a lush, deep low-pass filter.',
     paletteStops: [
       { t: 0.0, rgb: [18, 66, 178], hex: '#1242b2', label: 'Polar (-2°C)' },
       { t: 0.35, rgb: [44, 178, 220], hex: '#2cb2dc', label: 'Cool (10°C)' },
@@ -198,9 +198,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'OMPS_Aerosol_Index',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Пылевые шлейфы Сахары и Кызылкума/Таджикистана, дым пожаров и морской аэрозоль (SVS #5669 / #5151).',
+      'Saharan and Kyzylkum/Tajikistan dust plumes, wildfire smoke, and marine sea-salt aerosols (SVS #5669 / #5151).',
     audioLegendSummary:
-      'Многослойный аэрозольный синт: концентрация пыли меняет частоту полосового ветрового фильтра и шум.',
+      'Multi-layered aerosol synth: dust concentration sweeps the bandpass wind filter frequency and noise texture.',
     paletteStops: [
       { t: 0.0, rgb: [248, 242, 214], hex: '#f8f2d6', label: 'Clear (2)' },
       { t: 0.35, rgb: [242, 180, 96], hex: '#f2b460', label: 'Haze (50)' },
@@ -233,9 +233,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'AIRS_CO2_Monthly_Free_Troposphere_Day',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Динамика глобального CO₂: накопление в северном полушарии и сезонное «дыхание» лесов Земли (SVS #5196).',
+      'Global CO₂ dynamics: Northern Hemisphere accumulation and the seasonal "breathing" of Earth’s forests (SVS #5196).',
     audioLegendSummary:
-      'Высокая концентрация CO₂ сгущает гармоники в низком регистре (C1–F3) — «дыхание планеты».',
+      'High CO₂ concentrations thicken low-register harmonics (C1–F3) — the planetary breath.',
     paletteStops: [
       { t: 0.0, rgb: [72, 138, 212], hex: '#488ad4', label: '392 ppm' },
       { t: 0.4, rgb: [244, 212, 128], hex: '#f4d480', label: '408 ppm' },
@@ -269,9 +269,9 @@ export const SVS_LAYERS = [
     gibsLayer: null,
     gibsDefaultDate: '2023-06-01',
     description:
-      'Оптические вспышки молний с борта МКС (2017–2023). Точечная перкуссионная сонификация: вспышка = удар (Chandra Binary Beats).',
+      'Optical lightning flashes observed from the ISS (2017–2023). Point-percussion sonification: each flash = 1 beat (Chandra Binary Beats).',
     audioLegendSummary:
-      'Спокойные зоны = 0 (тишина); грозовые кластеры Маракайбо, Конго и Гималаев выбивают бинарный удар = 1.',
+      'Calm regions = 0 (silence); storm clusters over Maracaibo, Congo, and the Himalayas trigger binary strike = 1.',
     paletteStops: [
       { t: 0.0, rgb: [10, 14, 38], hex: '#0a0e26', label: '0 Flashes' },
       { t: 0.35, rgb: [86, 44, 158], hex: '#562c9e', label: 'Moderate (45)' },
@@ -305,9 +305,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'IMERG_Precipitation_Rate',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Потоки атмосферной влаги и осадков (SVS #4960 / #5149): капельная мелодия + Chandra Binary Drumming на ливнях.',
+      'Atmospheric moisture rivers and precipitation rates (SVS #4960 / #5149): droplet melody + Chandra Binary Drumming on downpours.',
     audioLegendSummary:
-      'Лёгкий дождь звучит высокими каплями, ливневые фронты включают бинарный перкуссионный ритм.',
+      'Light rain plays high crystal droplets; heavy storm fronts engage binary percussive drumming.',
     paletteStops: [
       { t: 0.0, rgb: [16, 32, 62], hex: '#10203e', label: 'Dry (0 mm/hr)' },
       { t: 0.35, rgb: [38, 162, 74], hex: '#26a24a', label: 'Rain (10)' },
@@ -340,9 +340,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'MODIS_Terra_NDVI_8Day',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Высота лесного полога по лидару GEDI на МКС (SVS #4950): чем выше деревья (Амазония, Конго, Калифорния), тем богаче маримба.',
+      'Forest canopy height from ISS GEDI Lidar (SVS #4950): taller forests (Amazon, Congo, California) produce richer marimba voices.',
     audioLegendSummary:
-      'Пустыни = мягкий фон; тропические и секвойные леса до 65 м рождают органичную деревянную маримбу.',
+      'Arid deserts = soft ambient pad; tropical rainforests and 65m redwoods bloom into warm wooden marimba.',
     paletteStops: [
       { t: 0.0, rgb: [188, 174, 134], hex: '#bcae86', label: 'Arid (0m)' },
       { t: 0.35, rgb: [132, 202, 92], hex: '#84ca5c', label: 'Savanna (18m)' },
@@ -375,9 +375,9 @@ export const SVS_LAYERS = [
     gibsLayer: null,
     gibsDefaultDate: '2023-11-01',
     description:
-      '30 лет измерений уровня Мирового океана (SVS #5533): волны Кельвина Эль-Ниньо в Тихом океане и глобальный подъём воды (+10.1 см).',
+      '30 years of global sea-level altimetry (SVS #5533): Pacific El Niño Kelvin waves and global sea-level rise (+10.1 cm).',
     audioLegendSummary:
-      'Положительные аномалии уровня моря и тёплый язык Эль-Ниньо звучат глубоким океаническим хором (C2–G3).',
+      'Positive sea-level anomalies and the warm El Niño tongue resonate as a deep oceanic choir (C2–G3).',
     paletteStops: [
       { t: 0.0, rgb: [22, 54, 156], hex: '#16369c', label: 'La Niña (-15cm)' },
       { t: 0.4, rgb: [64, 182, 224], hex: '#40b6e0', label: 'Mean SSH (0cm)' },
@@ -410,9 +410,9 @@ export const SVS_LAYERS = [
     gibsLayer: 'AIRS_L3_Surface_Air_Temperature_Daily_Day',
     gibsDefaultDate: '2024-06-01',
     description:
-      'Приземная температура воздуха GEOS-FP (SVS #5147 из галереи NASA): экстремальные волны жары в Азии, Сахаре и Америке.',
+      'GEOS-FP surface air temperature (NASA SVS #5147): extreme heatwaves across Asia, the Sahara, and the Americas.',
     audioLegendSummary:
-      'Ледяные полюса звучат высокими кристаллами (A5–A6); раскалённые пустыни и тепловые купола уходят в густой бас (C1–G2).',
+      'Frozen poles chime as high ice crystals (A5–A6); scorching deserts and heat domes drop into deep bass (C1–G2).',
     paletteStops: [
       { t: 0.0, rgb: [38, 88, 198], hex: '#2658c6', label: 'Freeze (-25°C)' },
       { t: 0.35, rgb: [244, 196, 78], hex: '#f4c44e', label: 'Temperate (15°C)' },
@@ -446,9 +446,9 @@ export const SVS_LAYERS = [
     gibsLayer: null,
     gibsDefaultDate: '2024-09-01',
     description:
-      'Приземная скорость ветра GEOS-FP (#5148) и графики ветра атлантических ураганов (#5072): циклоны, тайфуны и струйные течения.',
+      'GEOS-FP near-surface wind speed (#5148) and Atlantic hurricane tracks (#5072): cyclones, typhoons, and jet streams.',
     audioLegendSummary:
-      'Штиль звучит мягко; вихри ураганов Категории 5 включают свистящий ветровой фильтр и ударный пульс.',
+      'Calm air plays softly; Category 5 hurricane eyewalls sweep a whistling wind filter and rhythmic pulse.',
     paletteStops: [
       { t: 0.0, rgb: [12, 20, 68], hex: '#0c1444', label: 'Calm (0 km/h)' },
       { t: 0.35, rgb: [32, 92, 232], hex: '#205ce8', label: 'Gale (75 km/h)' },
@@ -481,9 +481,9 @@ export const SVS_LAYERS = [
     gibsLayer: null,
     gibsDefaultDate: '2024-06-01',
     description:
-      'Оксиды азота NOx (#5154, зелёная палитра) и приземный озон O₃ (#5152, фиолетовая палитра) над индустриальными коридорами и морскими путями.',
+      'Nitrogen oxides NOx (#5154, green palette) and surface ozone O₃ (#5152, violet palette) over industrial corridors and shipping lanes.',
     audioLegendSummary:
-      'Чистая атмосфера звучит прозрачно; фотохимические шлейфы NOx/O₃ создают плотный стеклянно-металлический резонанс.',
+      'Clean atmosphere sounds crystal clear; photochemical NOx/O₃ plumes create a dense glassy-metallic resonance.',
     paletteStops: [
       { t: 0.0, rgb: [232, 244, 234], hex: '#e8f4ea', label: 'Clean (5 ppbv)' },
       { t: 0.35, rgb: [112, 218, 124], hex: '#70da7c', label: 'Shipping/Roads (38)' },

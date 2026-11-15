@@ -93,16 +93,6 @@ export function OrbitalNetwork() {
   const isPlaying = useReceiverStore((s) => s.isPlaying);
   const reducedMotion = useReceiverStore((s) => s.reducedMotion);
 
-  // Single clean orbital curve
-  const orbitalArcPoints = useMemo(() => {
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0.45, 2.05, -1.6),
-      new THREE.Vector3(-0.75, 1.15, -0.9),
-      new THREE.Vector3(-1.55, -0.15, -0.5),
-    ]);
-    return curve.getPoints(48);
-  }, []);
-
   // Single clean relay link: Satellite -> Alien Receiver
   const relayLink = useMemo(
     () => [

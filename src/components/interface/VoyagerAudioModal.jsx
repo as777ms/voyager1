@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -14,21 +14,39 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { useReceiverStore } from '../../store/useReceiverStore';
+import { VOYAGER_GOLDEN_RECORD_TRACKS } from '../../data/nasaData';
 import { audioEngine } from '../../audio/AudioEngine';
 
 const GREETINGS_LANGUAGES = [
   { id: 'g-en', lang: 'English', text: '"Hello from the children of planet Earth."', spoken: 'Hello from the children of planet Earth.', langCode: 'en-US', era: 'Modern', freq: 261.63 },
-  { id: 'g-ru', lang: 'Russian (Русский)', text: '"Здравствуйте! Приветствую вас!"', spoken: 'Здравствуйте! Приветствую вас!', langCode: 'ru-RU', era: 'Modern', freq: 293.66 },
-  { id: 'g-fa', lang: 'Persian / Tajik (Форсӣ)', text: '"Dorud bar sakinân-e mawrâ-ye âsemân-hâ."', spoken: 'Greetings to the residents of far skies.', langCode: 'en-US', era: 'Modern / Silk Road', freq: 466.16 },
-  { id: 'g-zh', lang: 'Mandarin Chinese', text: '"各位都好吧？我们都很想念你们，有空请到这儿来玩。"', spoken: 'Best wishes from all the people of Earth.', langCode: 'zh-CN', era: 'Modern', freq: 329.63 },
-  { id: 'g-es', lang: 'Spanish', text: '"Hola y saludos a todos."', spoken: 'Hola y saludos a todos.', langCode: 'es-ES', era: 'Modern', freq: 349.23 },
-  { id: 'g-fr', lang: 'French', text: '"Bonjour tout le monde."', spoken: 'Bonjour tout le monde.', langCode: 'fr-FR', era: 'Modern', freq: 392.0 },
-  { id: 'g-ja', lang: 'Japanese', text: '"こんにちは。お元気ですか？"', spoken: 'Konnichiwa. Ogenki desu ka?', langCode: 'ja-JP', era: 'Modern', freq: 440.0 },
-  { id: 'g-ar', lang: 'Arabic', text: '"تحياتنا للأصدقاء في النجوم."', spoken: 'Greetings to our friends in the stars.', langCode: 'ar-SA', era: 'Modern', freq: 493.88 },
-  { id: 'g-su', lang: 'Sumerian', text: '"Silim-ma hé-me-en (May all be well)."', spoken: 'Silim ma he me en. May all be well.', langCode: 'en-GB', era: 'Ancient (c. 3000 BCE)', freq: 220.0 },
-  { id: 'g-ak', lang: 'Akkadian', text: '"Adanniš lu šulmu (May all be very well)."', spoken: 'Adannish lu shulmu. May all be very well with you.', langCode: 'en-GB', era: 'Ancient (c. 2400 BCE)', freq: 246.94 },
-  { id: 'g-el', lang: 'Ancient Greek', text: '"Οἵτινές ποτ᾽ ἐστέ, χαίρετε."', spoken: 'Greetings whoever you are. We come in friendship.', langCode: 'el-GR', era: 'Classical', freq: 311.13 },
-  { id: 'g-la', lang: 'Latin', text: '"Salvete quicumque estis."', spoken: 'Salvete quicumque estis; bonam erga vos voluntatem habemus.', langCode: 'it-IT', era: 'Classical', freq: 369.99 },
+  { id: 'g-ru', lang: 'Russian', text: '"Zdravstvuyte! Privetstvuyu vas!" ("Greetings! I welcome you!")', spoken: 'Greetings! I welcome you from planet Earth.', langCode: 'en-US', era: 'Modern', freq: 293.66 },
+  { id: 'g-fa', lang: 'Persian / Tajik', text: '"Dorud bar sakinan-e mawra-ye aseman-ha." ("Greetings to the residents of far skies.")', spoken: 'Greetings to the residents of far skies.', langCode: 'en-US', era: 'Modern / Silk Road', freq: 466.16 },
+  { id: 'g-zh', lang: 'Mandarin Chinese', text: '"Ge wei dou hao ba?" ("Best wishes from all the people of Earth.")', spoken: 'Best wishes from all the people of Earth.', langCode: 'en-US', era: 'Modern', freq: 329.63 },
+  { id: 'g-es', lang: 'Spanish', text: '"Hola y saludos a todos." ("Hello and greetings to all.")', spoken: 'Hello and greetings to all.', langCode: 'en-US', era: 'Modern', freq: 349.23 },
+  { id: 'g-fr', lang: 'French', text: '"Bonjour tout le monde." ("Hello everyone.")', spoken: 'Hello everyone.', langCode: 'en-US', era: 'Modern', freq: 392.0 },
+  { id: 'g-ja', lang: 'Japanese', text: '"Konnichiwa. Ogenki desu ka?" ("Hello. How are you?")', spoken: 'Hello. How are you?', langCode: 'en-US', era: 'Modern', freq: 440.0 },
+  { id: 'g-ar', lang: 'Arabic', text: '"Tahiyatuna lil-asdiqa fi al-nujum." ("Greetings to our friends in the stars.")', spoken: 'Greetings to our friends in the stars.', langCode: 'en-US', era: 'Modern', freq: 493.88 },
+  { id: 'g-su', lang: 'Sumerian', text: '"Silim-ma he-me-en." ("May all be well.")', spoken: 'Silim ma he me en. May all be well.', langCode: 'en-GB', era: 'Ancient (c. 3000 BCE)', freq: 220.0 },
+  { id: 'g-ak', lang: 'Akkadian', text: '"Adannis lu sulmu." ("May all be very well.")', spoken: 'Adannish lu shulmu. May all be very well with you.', langCode: 'en-GB', era: 'Ancient (c. 2400 BCE)', freq: 246.94 },
+  { id: 'g-el', lang: 'Ancient Greek', text: '"Oitines pot este, chairete." ("Greetings whoever you are.")', spoken: 'Greetings whoever you are. We come in friendship.', langCode: 'en-US', era: 'Classical', freq: 311.13 },
+  { id: 'g-la', lang: 'Latin', text: '"Salvete quicumque estis." ("Greetings, whoever you may be.")', spoken: 'Greetings, whoever you may be; we have goodwill toward you.', langCode: 'en-US', era: 'Classical', freq: 369.99 },
+];
+
+const ARCHIVE_WAV_STREAMS = [
+  {
+    id: 'wav-launch',
+    title: 'Voyager-1 Launch Commentary (1977)',
+    source: 'Archive.org / NASA Voyager-1 Mission',
+    streamUrl: 'https://archive.org/download/Voyager1/Voyager-1_Launch_Commentary.wav',
+    detailsUrl: 'https://archive.org/details/Voyager1/Voyager-1_Launch_Commentary.wav',
+  },
+  {
+    id: 'wav-495aab',
+    title: 'Voyager Golden Record Telemetry & Audio (495-AAB, 8m10s)',
+    source: 'Archive.org / NASA Golden Record',
+    streamUrl: 'https://archive.org/download/Voyager1/495-AAB_8min10sec.wav',
+    detailsUrl: 'https://archive.org/details/Voyager1/495-AAB_8min10sec.wav',
+  },
 ];
 
 const NASA_EARTH_SOUNDS = [
@@ -42,16 +60,7 @@ const NASA_EARTH_SOUNDS = [
   { id: 's-8', title: 'Pulsar CP 1919 Radiation Clock', cat: 'Astrophysics', freq: 92.5, note: 'F#2', audioCategory: 'pulsar' },
 ];
 
-const VOYAGER_WORLD_MUSIC = [
-  { id: 'bach', title: 'J.S. Bach — Brandenburg Concerto No. 2 (First Movement)', region: 'Germany / Baroque Counterpoint', key: 'F Major' },
-  { id: 'gamelan', title: 'Court Gamelan — "Kinds of Flowers" (Puspawarna)', region: 'Java, Indonesia / Slendro Scale', key: 'Slendro 5-Tone' },
-  { id: 'chakrulo', title: 'Georgian Folk Choir — "Chakrulo"', region: 'Caucasus / 3-Part Vocal Polyphony', key: 'Dorian Drone' },
-  { id: 'panpipes', title: 'Andean Panpipes & Drum — "Casa"', region: 'Peru / Sikuri Wind Ensemble', key: 'E Minor Pentatonic' },
-  { id: 'senegal', title: 'Senegalese Percussion — Recorded by Charles Duvelle', region: 'West Africa / Polyrhythmic Talking Drum', key: 'Polyrhythm' },
-  { id: 'navajo', title: 'Navajo Night Chant — Ceremonial Vocal', region: 'North America / Indigenous Chant', key: 'C Pentatonic' },
-  { id: 'beethoven', title: 'L. van Beethoven — Symphony No. 5 (First Movement)', region: 'Austria / Fate Motif', key: 'C Minor' },
-  { id: 'berry', title: 'Chuck Berry — "Johnny B. Goode"', region: 'United States / Rock & Roll Riff', key: 'Bb Blues' },
-];
+const VOYAGER_WORLD_MUSIC = VOYAGER_GOLDEN_RECORD_TRACKS;
 
 const VOYAGER_ENCODED_IMAGES = [
   { id: 'img-circle', frame: '#001', title: 'Calibration Circle', category: '512x512 Aspect Calibration', desc: 'Binary reference circle etched on the cover so extraterrestrials can align scanlines.' },
@@ -65,12 +74,15 @@ const VOYAGER_ENCODED_IMAGES = [
 ];
 
 export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnClose } = {}) {
-  const [activeTab, setActiveTab] = useState('greetings'); // 'greetings' | 'nasaSounds' | 'worldMusic'
   const [activeSoundId, setActiveSoundId] = useState(null);
+  const [activeYoutubeTrack, setActiveYoutubeTrack] = useState(null);
   const [isTourPlaying, setIsTourPlaying] = useState(false);
+  const modalBodyRef = useRef(null);
 
   const activeStation = useReceiverStore((s) => s.getActiveStation());
   const storeIsOpen = useReceiverStore((s) => s.isVoyagerModalOpen);
+  const activeTab = useReceiverStore((s) => s.voyagerModalTab);
+  const setActiveTab = useReceiverStore((s) => s.setVoyagerModalTab);
   const setVoyagerModalOpen = useReceiverStore((s) => s.setVoyagerModalOpen);
 
   const isOpen = propIsOpen !== undefined ? propIsOpen : storeIsOpen;
@@ -140,7 +152,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
     audioEngine.stopActiveSequences();
     setIsTourPlaying(false);
     setActiveSoundId(track.id);
-    audioEngine.playVoyagerMusicTrack(track.id);
+    audioEngine.playVoyagerMusicTrack(track.synthStyle || track.id);
   };
 
   const playImageCard = (img) => {
@@ -149,6 +161,18 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
     setIsTourPlaying(false);
     setActiveSoundId(img.id);
     audioEngine.playVoyagerEncodedImage(img.id);
+  };
+
+  const toggleArchiveWav = (wav) => {
+    audioEngine.unlockSync();
+    if (activeSoundId === wav.id) {
+      stopAllModalAudio();
+      setActiveSoundId(null);
+      return;
+    }
+    setIsTourPlaying(false);
+    setActiveSoundId(wav.id);
+    audioEngine.playStreamUrl(wav.streamUrl, () => setActiveSoundId(null));
   };
 
   const handleToggleTour = () => {
@@ -209,7 +233,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
       VOYAGER_WORLD_MUSIC.forEach((track, idx) => {
         audioEngine.scheduleTimer(() => {
           setActiveSoundId(track.id);
-          audioEngine.playVoyagerMusicTrack(track.id, ((idx % 3) - 1) * 0.35);
+          audioEngine.playVoyagerMusicTrack(track.synthStyle || track.id, ((idx % 3) - 1) * 0.35);
           if (idx === VOYAGER_WORLD_MUSIC.length - 1) {
             audioEngine.scheduleTimer(() => setIsTourPlaying(false), 1200);
           }
@@ -317,7 +341,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                   }`}
                 >
                   <Music className="w-3 h-3" />
-                  <span>WORLD MUSIC (8)</span>
+                  <span>WORLD MUSIC ({VOYAGER_WORLD_MUSIC.length})</span>
                 </button>
 
                 <button
@@ -366,7 +390,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
             </div>
 
             {/* Body Content */}
-            <div className="overflow-y-auto custom-scrollbar p-3.5 sm:p-4 flex-1 space-y-3">
+            <div ref={modalBodyRef} className="overflow-y-auto custom-scrollbar p-3.5 sm:p-4 flex-1 space-y-3">
               {activeTab === 'greetings' && (
                 <div>
                   <div className="y2k-lcd p-2.5 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2.5">
@@ -447,15 +471,74 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                         Click any card below to synthesize geological, biological, human heartbeat, Saturn V, and pulsar signatures.
                       </div>
                     </div>
-                    <a
-                      href="https://science.nasa.gov/mission/voyager/golden-record-contents/sounds/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="y2k-aqua-btn px-2.5 py-1 font-mono font-bold text-[10px] rounded-lg flex items-center gap-1 shrink-0 cursor-pointer"
-                    >
-                      <span>NASA ARCHIVE</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                      <a
+                        href="https://science.nasa.gov/mission/voyager/golden-record-contents/sounds/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="y2k-aqua-btn px-2.5 py-1 font-mono font-bold text-[10px] rounded-lg flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>NASA SOUNDS</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <a
+                        href="https://science.nasa.gov/mission/voyager/voyager-1/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="y2k-metal-btn px-2.5 py-1 font-mono font-bold text-[10px] rounded-lg text-cyan-200 flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>VOYAGER-1</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Real Archive.org WAV Streams */}
+                  <div className="mb-3 space-y-1.5">
+                    <div className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider">
+                      REAL ARCHIVE.ORG WAV STREAMS (DIRECT PLAYBACK)
+                    </div>
+                    {ARCHIVE_WAV_STREAMS.map((wav) => {
+                      const isPlayingWav = activeSoundId === wav.id;
+                      return (
+                        <div
+                          key={wav.id}
+                          className={`flex items-center justify-between p-2 rounded-lg border ${
+                            isPlayingWav
+                              ? 'y2k-lcd border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+                              : 'bg-slate-900/75 border-amber-500/30'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1 pr-2">
+                            <div className="text-xs font-mono font-bold text-amber-200 truncate">
+                              {wav.title}
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-400 truncate">
+                              {wav.source}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => toggleArchiveWav(wav)}
+                              className="y2k-gold-btn px-2.5 py-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              {isPlayingWav ? <Square className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
+                              <span>{isPlayingWav ? 'STOP WAV' : 'PLAY WAV'}</span>
+                            </button>
+                            <a
+                              href={wav.detailsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="y2k-metal-btn px-2 py-1 rounded text-[10px] font-mono text-slate-200 flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>ARCHIVE</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div className="space-y-2">
@@ -500,49 +583,142 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
 
               {activeTab === 'worldMusic' && (
                 <div>
-                  <div className="y2k-lcd p-2.5 rounded-lg mb-2.5">
-                    <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-300">
-                      <Music className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                      90 MINUTES OF HUMANITY&apos;S GREATEST MUSIC — INTERACTIVE MOTIFS
+                  <div className="y2k-lcd p-2.5 rounded-lg mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-300">
+                        <Music className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                        ALL {VOYAGER_WORLD_MUSIC.length} GOLDEN RECORD TRACKS — ORIGINAL ARCHIVE + SYNTH
+                      </div>
+                      <div className="text-[10px] text-slate-300 mt-0.5">
+                        Play the original 1977 Archive.org Golden Record WAV stream below, click PLAY for local synthesis, or WATCH / YT for the YouTube recording.
+                      </div>
                     </div>
-                    <div className="text-[10px] text-slate-300 mt-0.5">
-                      Click any masterpiece from Carl Sagan&apos;s 1977 Golden Record selection to hear its musical motif synthesized live.
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleArchiveWav(ARCHIVE_WAV_STREAMS[1])}
+                      className="y2k-gold-btn px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    >
+                      {activeSoundId === ARCHIVE_WAV_STREAMS[1].id ? (
+                        <Square className="w-3 h-3 fill-current" />
+                      ) : (
+                        <Play className="w-3 h-3 fill-current" />
+                      )}
+                      <span>{activeSoundId === ARCHIVE_WAV_STREAMS[1].id ? 'STOP 1977 WAV' : 'PLAY 1977 WAV'}</span>
+                    </button>
                   </div>
+
+                  {activeYoutubeTrack && (
+                    <div className="mb-3 rounded-lg overflow-hidden border border-amber-400/60 bg-black shadow-lg">
+                      <div className="px-2.5 py-1.5 bg-[#0a1326] flex items-center justify-between text-[10px] font-mono border-b border-amber-400/30 gap-2">
+                        <span className="text-amber-300 font-bold truncate">
+                          NOW STREAMING #{activeYoutubeTrack.num}: {activeYoutubeTrack.title}
+                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <a
+                            href={activeYoutubeTrack.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-300 hover:text-white px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40 flex items-center gap-1"
+                          >
+                            <span>OPEN YT</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setActiveYoutubeTrack(null)}
+                            className="text-slate-300 hover:text-white px-1.5 py-0.5 rounded bg-slate-800 cursor-pointer"
+                          >
+                            HIDE PLAYER
+                          </button>
+                        </div>
+                      </div>
+                      <iframe
+                        key={activeYoutubeTrack.youtubeId}
+                        width="100%"
+                        height="200"
+                        src={`https://www.youtube.com/embed/${activeYoutubeTrack.youtubeId}?autoplay=1&rel=0`}
+                        title={activeYoutubeTrack.title}
+                        frameBorder="0"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     {VOYAGER_WORLD_MUSIC.map((track) => {
                       const isCurrent = activeSoundId === track.id;
+                      const isWatching = activeYoutubeTrack?.id === track.id;
                       return (
                         <div
                           key={track.id}
                           onClick={() => playMusicCard(track)}
-                          className={`flex items-center justify-between p-2.5 rounded-lg transition-all cursor-pointer ${
-                            isCurrent
+                          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg transition-all cursor-pointer ${
+                            isCurrent || isWatching
                               ? 'y2k-lcd border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
                               : 'y2k-metal-btn'
                           }`}
                         >
                           <div className="min-w-0 flex-1 pr-2">
                             <div className="text-xs font-bold font-mono text-white truncate">
+                              <span className="text-amber-300 mr-1.5">#{track.num}</span>
                               {track.title}
                             </div>
-                            <div className="text-[10px] font-mono text-amber-300/85 mt-0.5">
-                              {track.region} • Scale/Key: {track.key}
+                            <div className="text-[10px] font-mono text-cyan-300/85 truncate mt-0.5">
+                              {track.performer}
+                            </div>
+                            <div className="text-[9px] font-mono text-amber-300/80 mt-0.5">
+                              {track.region} • Key: {track.key}
                             </div>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              playMusicCard(track);
-                            }}
-                            className="y2k-gold-btn px-3 py-1.5 rounded-md text-[11px] font-mono font-bold flex items-center gap-1.5 cursor-pointer shrink-0"
-                          >
-                            <Play className="w-3 h-3 fill-current" />
-                            <span>PLAY</span>
-                          </button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                playMusicCard(track);
+                              }}
+                              className="y2k-gold-btn px-2.5 py-1 rounded-md text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                              title="Play instant local Web Audio motif"
+                            >
+                              <Play className="w-3 h-3 fill-current" />
+                              <span>PLAY</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                stopAllModalAudio();
+                                const nextTrack = isWatching ? null : track;
+                                setActiveYoutubeTrack(nextTrack);
+                                if (nextTrack && modalBodyRef.current) {
+                                  modalBodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                              }}
+                              className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer ${
+                                isWatching ? 'y2k-aqua-btn' : 'y2k-metal-btn text-cyan-300 hover:text-white'
+                              }`}
+                              title="Open inline YouTube player"
+                            >
+                              <Radio className="w-3 h-3" />
+                              <span>{isWatching ? 'CLOSE' : 'WATCH'}</span>
+                            </button>
+
+                            <a
+                              href={track.youtubeUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="y2k-metal-btn px-2 py-1 rounded-md text-[10px] font-mono text-slate-300 hover:text-white flex items-center gap-1"
+                              title="Open on YouTube"
+                            >
+                              <span>YT</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
                         </div>
                       );
                     })}

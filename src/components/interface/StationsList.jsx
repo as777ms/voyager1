@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, Disc, List, X, Globe, Flame, AlertTriangle } from 'lucide-react';
+import { Play, Pause, Disc, List, X, Flame, AlertTriangle } from 'lucide-react';
 import { NASA_STATIONS, TIMELINE_YEARS } from '../../data/nasaData';
 import { useReceiverStore } from '../../store/useReceiverStore';
 import { audioEngine } from '../../audio/AudioEngine';
@@ -14,7 +14,6 @@ export default function StationsList() {
   const selectedYear = useReceiverStore((s) => s.selectedYear);
   const setSelectedYear = useReceiverStore((s) => s.setSelectedYear);
   const invertPitch = useReceiverStore((s) => s.invertPitch);
-  const setWorldMapOpen = useReceiverStore((s) => s.setWorldMapOpen);
   const setVoyagerModalOpen = useReceiverStore((s) => s.setVoyagerModalOpen);
 
   const [isMobileOpen, setMobileOpen] = useState(false);
@@ -89,14 +88,14 @@ export default function StationsList() {
         </button>
       </div>
 
-      {/* Pinned Full-Height Right Dashboard (Docked top-0 to bottom-0 on Desktop) */}
+      {/* Pinned Full-Height Right Dashboard (Adaptive width for 1280px–1920px laptops) */}
       <aside
         aria-label="Earth Stations Dashboard"
         className={`pointer-events-auto transition-all duration-300 ${
           isMobileOpen
-            ? 'fixed inset-y-0 right-0 w-[90vw] sm:w-[370px] z-40 flex flex-col'
-            : 'hidden lg:flex flex-col w-[350px] xl:w-[380px] h-full shrink-0'
-        } y2k-window rounded-none lg:rounded-l-xl border-r-0 border-y-0 overflow-hidden`}
+            ? 'fixed inset-y-3 right-3 w-[88vw] sm:w-[350px] z-40 flex flex-col rounded-xl'
+            : 'hidden lg:flex flex-col w-[290px] xl:w-[330px] 2xl:w-[360px] h-full shrink-0 rounded-xl'
+        } y2k-window border border-cyan-500/25 overflow-hidden`}
       >
         {/* Top Window Titlebar */}
         <div className="y2k-titlebar px-3 py-2 flex items-center justify-between shrink-0">
@@ -111,14 +110,6 @@ export default function StationsList() {
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={() => setWorldMapOpen(true)}
-              title="Open NASA Worldview Telemetry Map"
-              className="y2k-aqua-btn px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer"
-            >
-              <Globe className="w-3 h-3" />
-              <span>WORLD MAP</span>
-            </button>
             <button
               onClick={() => setVoyagerModalOpen(true)}
               className="y2k-gold-btn px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer"

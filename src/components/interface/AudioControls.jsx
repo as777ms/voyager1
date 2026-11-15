@@ -8,6 +8,7 @@ import {
   VolumeX,
   Radio,
   Globe,
+  Music,
 } from 'lucide-react';
 import { useReceiverStore } from '../../store/useReceiverStore';
 import { getSvsLayerById } from '../../data/svsLayers';
@@ -31,6 +32,7 @@ export default function AudioControls() {
   const selectedYear = useReceiverStore((s) => s.selectedYear);
   const getYearTelemetry = useReceiverStore((s) => s.getYearTelemetry);
   const setWorldMapOpen = useReceiverStore((s) => s.setWorldMapOpen);
+  const setVoyagerModalOpen = useReceiverStore((s) => s.setVoyagerModalOpen);
   const activeSvsLayerId = useReceiverStore((s) => s.activeSvsLayerId);
   const activeSvsLayer = getSvsLayerById(activeSvsLayerId);
 
@@ -90,7 +92,7 @@ export default function AudioControls() {
   };
 
   return (
-    <div className="w-full pointer-events-auto">
+    <div className="w-full max-w-[820px] xl:max-w-[880px] mx-auto pointer-events-auto">
       <div className="y2k-window rounded-xl overflow-hidden shadow-2xl">
         {/* Top Metallic Bevel Strip */}
         <div className="y2k-titlebar px-3 py-1 flex items-center justify-between text-[9px] font-mono">
@@ -144,14 +146,27 @@ export default function AudioControls() {
               </div>
             </div>
 
-            <button
-              onClick={() => setWorldMapOpen(true)}
-              title={`Locate Signal on EIC Jukebox Map (SVS #${activeSvsLayer.svsId})`}
-              className="y2k-metal-btn px-2 py-1 rounded text-[9px] font-mono text-cyan-300 hover:text-white flex items-center gap-1 shrink-0 cursor-pointer"
-            >
-              <Globe className="w-3 h-3" />
-              <span className="hidden md:inline">MAP • #{activeSvsLayer.svsId}</span>
-            </button>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => setVoyagerModalOpen(true, 'worldMusic')}
+                title="Open all 27 Voyager Golden Record Music Tracks"
+                className="y2k-gold-btn px-2 py-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+              >
+                <Music className="w-3 h-3" />
+                <span className="hidden sm:inline">27 TRACKS</span>
+                <span className="sm:hidden">27</span>
+              </button>
+
+              <button
+                onClick={() => setWorldMapOpen(true)}
+                title={`Open NASA Worldview EIC Map (SVS #${activeSvsLayer.svsId})`}
+                className="y2k-aqua-btn px-2 sm:px-2.5 py-1 rounded text-[10px] font-mono font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">WORLD MAP [W]</span>
+                <span className="md:hidden">MAP</span>
+              </button>
+            </div>
           </div>
 
           {/* Center: Transport Buttons */}

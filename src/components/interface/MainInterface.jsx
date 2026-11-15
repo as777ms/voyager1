@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Radio, Crosshair, Cpu, Eye, Radar, Waves } from 'lucide-react';
+import { Camera, Radio } from 'lucide-react';
 import StationsList from './StationsList';
-import DecodingKeyWidget from './DecodingKeyWidget';
 import BottomToolbar from './BottomToolbar';
 import AudioControls from './AudioControls';
 import DataExplorer from './DataExplorer';
@@ -30,8 +29,6 @@ export default function MainInterface() {
   const closeAllModals = useReceiverStore((s) => s.closeAllModals);
   const cameraPreset = useReceiverStore((s) => s.cameraPreset);
   const setCameraPreset = useReceiverStore((s) => s.setCameraPreset);
-  const sensorMode = useReceiverStore((s) => s.sensorMode);
-  const setSensorMode = useReceiverStore((s) => s.setSensorMode);
   const selectedYear = useReceiverStore((s) => s.selectedYear);
   const invertPitch = useReceiverStore((s) => s.invertPitch);
   const highContrast = useReceiverStore((s) => s.highContrast);
@@ -126,37 +123,28 @@ export default function MainInterface() {
     { id: 'earth', label: 'CAM 04: HORIZON' },
   ];
 
-  // Vertical Sensor / Camera Pods next to the Alien
-  const sensorPods = [
-    { id: 'optical', label: 'OPT-CAM', preset: 'overview', icon: Camera },
-    { id: 'thermal', label: 'IR-SCAN', preset: 'alien', icon: Eye },
-    { id: 'radar', label: 'SAR-POD', preset: 'overview', icon: Radar },
-    { id: 'seismic', label: 'GEO-SNS', preset: 'earth', icon: Crosshair },
-    { id: 'acoustic', label: 'WAV-REC', preset: 'disc', icon: Waves },
-  ];
-
-  // Interactive Floating Hotspots in Center Space / Earth Horizon
+  // Interactive Floating Hotspots in Center Space / Earth Horizon (positioned cleanly over Earth, clear of the satellite)
   const floatingHotspots = [
     {
       id: 'hs-glacier',
       stationId: 'glacierVelocity',
       title: 'Hotspot: Pamir Glacier',
       metric: 'Ice Velocity: 142.5 m/yr (TJ)',
-      posClass: 'top-[38%] left-[48%]',
+      posClass: 'top-[32%] left-[53%]',
     },
     {
       id: 'hs-aerosol',
       stationId: 'fireLocations',
       title: 'Hotspot: Thermal Anomaly',
       metric: 'Fire Radiative: +465 MW',
-      posClass: 'top-[55%] left-[44%]',
+      posClass: 'top-[52%] left-[49%]',
     },
     {
       id: 'hs-lightning',
       stationId: 'lightning',
       title: 'Hotspot: ISS-LIS Flash',
       metric: 'Lightning Activity: Peak',
-      posClass: 'top-[70%] left-[42%]',
+      posClass: 'top-[70%] left-[45%]',
     },
   ];
 
@@ -173,42 +161,22 @@ export default function MainInterface() {
   };
 
   return (
+    <>
     <div
-      className={`fixed inset-0 pointer-events-none z-30 flex h-full w-full overflow-hidden select-none ${
+      className={`fixed inset-0 pointer-events-none z-30 p-2 sm:p-3 lg:p-4 xl:p-5 flex h-full w-full overflow-hidden select-none ${
         highContrast ? 'contrast-125' : ''
       }`}
     >
       <ScreenReaderAnnouncer />
 
-      {/* ── LEFT & CENTER MAIN WORKSPACE ───────────────────────── */}
-      <div className="flex-1 flex flex-col justify-between p-2.5 sm:p-3.5 relative h-full min-w-0">
+      {/* Outer Framed HUD Container (Clean margins & subtle sci-fi bezel for all laptop sizes) */}
+      <div className="flex flex-1 h-full w-full min-w-0 gap-2.5 lg:gap-3.5 rounded-xl sm:rounded-2xl border border-cyan-500/20 p-1.5 sm:p-2.5 lg:p-3 shadow-[inset_0_0_24px_rgba(6,182,212,0.06)]">
+        {/* ── LEFT & CENTER MAIN WORKSPACE ───────────────────────── */}
+        <div className="flex-1 flex flex-col justify-between p-1 sm:p-1.5 relative h-full min-w-0">
         {/* 1. TOP SYSTEM BAR + CAMERA SELECTOR + VOYAGER HEADER */}
         <div className="flex flex-col gap-1.5 w-full z-20">
           {/* Top Framed OS Header Bar (Matches Reference Image) */}
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="y2k-window rounded-lg px-3 py-1.5 flex items-center justify-between pointer-events-auto mr-[132px] lg:mr-0"
-          >
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-b from-cyan-200 via-cyan-400 to-blue-600 border border-blue-950 shadow-[inset_0_1px_1px_rgba(255,255,255,0.85)]" />
-              <span className="text-xs sm:text-sm font-extrabold font-mono tracking-wider text-white uppercase drop-shadow">
-                SPACE APPS CHALLENGE <span className="text-cyan-300">2026</span>
-              </span>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-cyan-300/90 tracking-widest uppercase">
-              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-              <span>VOYAGER OS // BUILD 7884.DP</span>
-            </div>
-
-            <button
-              onClick={() => setWorldMapOpen(true)}
-              className="y2k-aqua-btn px-2.5 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer hidden sm:flex items-center gap-1"
-            >
-              <span>WORLDVIEW MAP [W]</span>
-            </button>
-          </motion.div>
+       
 
           {/* Sub-row: Camera Selector Pills (Left) & Active Golden Record Title (Right-Center) */}
           <div className="flex items-center justify-between gap-2">
@@ -242,41 +210,45 @@ export default function MainInterface() {
           </div>
         </div>
 
-        {/* 2. MIDDLE OVERLAYS: Vertical Sensor Pods (Left of Center) & Floating Earth Hotspots */}
+        {/* 2. MIDDLE OVERLAYS: Compact THE RECEIVER Card (Top-Left next to Alien) & Floating Earth Hotspots */}
         <div className="relative flex-1 w-full pointer-events-none">
-          {/* Vertical Receiver Sensor / Camera Stack next to the Alien (Matches Reference Image) */}
-          <div className="hidden md:flex flex-col gap-1.5 absolute left-[195px] lg:left-[230px] top-4 pointer-events-auto y2k-window p-1.5 rounded-xl">
-            
-            {sensorPods.map((pod) => {
-              const Icon = pod.icon;
-              const isSelected = sensorMode === pod.id;
-              return (
-                <button
-                  key={pod.id}
-                  onClick={() => {
-                    audioEngine.playHudPing(920);
-                    setSensorMode(pod.id);
-                    setCameraPreset(pod.preset);
-                  }}
-                  title={`Switch Receiver Sensor: ${pod.label}`}
-                  className={`w-11 h-11 rounded-lg flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
-                    isSelected
-                      ? 'y2k-lcd border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(56,189,248,0.35)]'
-                      : 'y2k-metal-btn text-slate-300 hover:text-white'
-                  }`}
+          {/* THE RECEIVER Card positioned directly under the top-left camera bar */}
+          <motion.div
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mt-2 md:mt-0 md:absolute md:left-0 md:top-2 w-full max-w-[310px] sm:w-[310px] pointer-events-auto y2k-window rounded-xl overflow-hidden"
+          >
+            <div className="y2k-titlebar px-3.5 py-1.5 flex items-center justify-between text-[10px] font-mono text-cyan-200">
+              <span className="font-bold tracking-wider">RECEIVER_CORE_SYS</span>
+              <span className="text-emerald-300">● SIGNAL LOCKED</span>
+            </div>
 
+            <div className="p-3.5">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <h1 className="text-xl sm:text-2xl font-extrabold font-mono tracking-wider text-white uppercase drop-shadow-[0_0_12px_rgba(56,189,248,0.45)]">
+                  THE RECEIVER
+                </h1>
+
+                <svg
+                  className="w-16 h-5 text-cyan-400 stroke-current shrink-0"
+                  viewBox="0 0 100 24"
+                  fill="none"
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-[7px] font-mono font-bold tracking-tighter">
-                    {pod.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  <path
+                    d="M0 12H20L28 3L36 21L44 8L52 16L60 12H100"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={isPlaying ? 'animate-pulse' : ''}
+                  />
+                </svg>
+              </div>
 
-
-          {/* ///now im thinking about it  */}
+              <p className="text-xs sm:text-sm italic text-cyan-300 font-sans">
+                An auditory gateway to Earth.
+              </p>
+            </div>
+          </motion.div>
 
           {/* Floating Interactive Hotspot Labels over Center Space / Earth */}
           <div className="hidden xl:block">
@@ -305,73 +277,28 @@ export default function MainInterface() {
           </div>
         </div>
 
-        {/* 3. BOTTOM WORKSPACE ROW: Equal-Width Left Stack (THE RECEIVER + DECODING KEY) & Right Controls */}
-        <div className="flex flex-col xl:flex-row items-stretch xl:items-end justify-between gap-2.5 w-full z-20">
-          {/* Bottom-Left Equal-Width Stack (w-full sm:w-[310px]) directly beneath the Alien & UFO */}
-          <div className="flex flex-col gap-2 w-full sm:w-[310px] shrink-0 pointer-events-auto">
-            {/* Panel 1: THE RECEIVER (Exact same width sm:w-[310px] as DecodingKeyWidget below it) */}
-            <div className="y2k-window w-full sm:w-[310px] rounded-xl overflow-hidden">
-              <div className="y2k-titlebar px-3 py-1 flex items-center justify-between text-[9px] font-mono text-cyan-200">
-                <span className="font-bold tracking-wider">RECEIVER_CORE_SYS</span>
-                <span className="text-emerald-300">● SIGNAL LOCKED</span>
-              </div>
-
-              <div className="p-2.5 sm:p-3">
-                <div className="flex items-center justify-between gap-2 mb-0.5">
-                  <h1 className="text-lg sm:text-xl font-extrabold font-mono tracking-wider text-white uppercase drop-shadow-[0_0_12px_rgba(56,189,248,0.45)]">
-                    THE RECEIVER
-                  </h1>
-
-                  <svg
-                    className="w-16 h-4 text-cyan-400 stroke-current shrink-0"
-                    viewBox="0 0 100 24"
-                    fill="none"
-                  >
-                    <path
-                      d="M0 12H20L28 3L36 21L44 8L52 16L60 12H100"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={isPlaying ? 'animate-pulse' : ''}
-                    />
-                  </svg>
-                </div>
-
-                {/* Updated Subtitle as requested ("An auditory gateway to Earth.") */}
-                <p className="text-xs italic text-cyan-300 font-sans">
-                  An auditory gateway to Earth.
-                </p>
-              </div>
+        {/* 3. BOTTOM WORKSPACE ROW: Clean, Lightweight Audio Deck + Bottom Toolbar */}
+        <div className="flex flex-col gap-2 w-full z-20">
+          <AudioControls />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 flex justify-center">
+              <BottomToolbar />
             </div>
-
-            {/* Panel 2: THE DECODING KEY (Exact same width sm:w-[310px] on xl+ screens) */}
-            <div className="hidden xl:block">
-              <DecodingKeyWidget />
-            </div>
-          </div>
-
-          {/* Bottom-Center/Right: Audio Deck + Bottom Toolbar */}
-          <div className="flex-1 flex flex-col gap-2 min-w-0">
-            <AudioControls />
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex-1 flex justify-center">
-                <BottomToolbar />
+            <div className="y2k-lcd px-2.5 py-1 rounded text-right hidden 2xl:block shrink-0">
+              <div className="text-[10px] font-mono font-bold text-cyan-300 uppercase">
+                HEAR EARTH.
               </div>
-              <div className="y2k-lcd px-2.5 py-1 rounded text-right hidden 2xl:block shrink-0">
-                <div className="text-[10px] font-mono font-bold text-cyan-300 uppercase">
-                  HEAR EARTH.
-                </div>
-                <div className="text-[10px] font-mono font-extrabold text-amber-300 uppercase">
-                  DECODE THE SIGNAL.
-                </div>
+              <div className="text-[10px] font-mono font-extrabold text-amber-300 uppercase">
+                DECODE THE SIGNAL.
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── FAR-RIGHT FULL-HEIGHT DOCKED DASHBOARD (3 Sections) ── */}
-      <StationsList />
+        {/* ── FAR-RIGHT FULL-HEIGHT DOCKED DASHBOARD (3 Sections) ── */}
+        <StationsList />
+      </div>
 
       {/* Collapsible Full Data Explorer Drawer */}
       <div className="pointer-events-auto">
@@ -386,5 +313,6 @@ export default function MainInterface() {
         <AccessibilityModal />
       </div>
     </div>
+    </>
   );
 }

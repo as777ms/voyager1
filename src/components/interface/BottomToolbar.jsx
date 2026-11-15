@@ -55,10 +55,10 @@ export default function BottomToolbar() {
         </button>
       </div>
 
-      {/* Compact Decoding Key button (< xl screens, since xl+ shows DecodingKeyWidget) */}
+      {/* Compact Decoding Key button */}
       <button
         onClick={() => setDecodingKeyOpen(true)}
-        className="xl:hidden y2k-metal-btn flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md hover:text-white transition-all cursor-pointer"
+        className="y2k-metal-btn flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-md hover:text-white transition-all cursor-pointer"
       >
         <Disc className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
         <span className="text-[10px] sm:text-[11px] font-bold tracking-wide text-slate-200 uppercase">

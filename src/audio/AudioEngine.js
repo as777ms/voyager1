@@ -55,6 +55,7 @@ class SonificationEngine {
     this.currentVolume = 0.85;
     this.isMuted = false;
     this.activeTimers = new Set();
+    this.activeStreamAudio = null;
     this.lastPointCallAt = 0;
     this.lastPointKey = '';
   }
@@ -188,6 +189,36 @@ class SonificationEngine {
   stopActiveSequences() {
     this.activeTimers.forEach((id) => clearTimeout(id));
     this.activeTimers.clear();
+    if (this.activeStreamAudio) {
+      try {
+        this.activeStreamAudio.pause();
+        this.activeStreamAudio.currentTime = 0;
+      } catch {
+        // Ignore cleanup errors
+      }
+      this.activeStreamAudio = null;
+    }
+  }
+
+  /**
+   * Streams an archival WAV/MP3 URL (e.g., Archive.org Voyager-1 recordings).
+   */
+  playStreamUrl(url, onEnded) {
+    this.stopActiveSequences();
+    if (typeof window === 'undefined' || !url) return null;
+    const audio = new window.Audio(url);
+    audio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.currentVolume));
+    audio.onended = () => {
+      if (this.activeStreamAudio === audio) {
+        this.activeStreamAudio = null;
+      }
+      if (onEnded) onEnded();
+    };
+    this.activeStreamAudio = audio;
+    audio.play().catch((err) => {
+      console.warn('Archive stream playback blocked or unavailable:', err);
+    });
+    return audio;
   }
 
   scheduleTimer(fn, delayMs) {
@@ -956,13 +987,17 @@ class SonificationEngine {
         });
       }
     } else if (cat === 'music') {
-      const title = String(point.value || point.id || '');
-      if (title.includes('Gamelan') || title.includes('gamelan')) {
-        this.playVoyagerMusicTrack('gamelan', pan);
-      } else if (title.includes('Chakrulo') || title.includes('chakrulo')) {
-        this.playVoyagerMusicTrack('chakrulo', pan);
+      if (point.synthStyle) {
+        this.playVoyagerMusicTrack(point.synthStyle, pan);
       } else {
-        this.playVoyagerMusicTrack('bach', pan);
+        const title = String(point.value || point.id || '');
+        if (title.includes('Gamelan') || title.includes('gamelan')) {
+          this.playVoyagerMusicTrack('gamelan', pan);
+        } else if (title.includes('Chakrulo') || title.includes('chakrulo')) {
+          this.playVoyagerMusicTrack('chakrulo', pan);
+        } else {
+          this.playVoyagerMusicTrack('bach', pan);
+        }
       }
     } else {
       // Spoken Language Greeting: Unique vowel formant melody + Web Speech API
@@ -1130,6 +1165,92 @@ class SonificationEngine {
             filterFreq: 2600,
             startOffset: idx * 0.11,
           });
+        });
+        break;
+      }
+      case 'zaire': {
+        // Ituri Pygmy Girls' Initiation Vocal Hocket
+        const hocket = [392.0, 523.25, 440.0, 587.33, 493.88, 659.25, 523.25];
+        hocket.forEach((f, idx) => {
+          this.playFormantSyllable(f, 700, 1300, {
+            duration: 0.13,
+            amp: 0.74,
+            pan: idx % 2 === 0 ? -0.35 : 0.35,
+            startOffset: idx * 0.11,
+          });
+        });
+        break;
+      }
+      case 'australia': {
+        // Arnhem Land Didgeridoo Drone + Clapstick Rhythm
+        this.playVoice(73.42, { type: 'sawtooth', duration: 0.95, amp: 0.72, pan, filterType: 'lowpass', filterFreq: 340 });
+        [0, 0.2, 0.4, 0.6, 0.8].forEach((t) => {
+          this.playFMVoice(1420, { modRatio: 2.3, modIndex: 90, attack: 0.002, duration: 0.06, amp: 0.6, pan: 0.2, startOffset: t });
+        });
+        break;
+      }
+      case 'mexico': {
+        // Mariachi El Cascabel Rapid Strumming & Trumpet Fanfare
+        const mariachi = [392.0, 493.88, 587.33, 783.99, 659.25, 587.33, 493.88];
+        mariachi.forEach((f, idx) => {
+          this.playVoice(f, { type: 'sawtooth', detuneCents: 12, duration: 0.14, amp: 0.75, pan, filterType: 'lowpass', filterFreq: 2400, startOffset: idx * 0.1 });
+        });
+        break;
+      }
+      case 'shakuhachi': {
+        // Japanese Shakuhachi Bamboo Flute Breath & In-Sen Scale
+        const insen = [587.33, 622.25, 783.99, 880.0, 783.99, 587.33];
+        insen.forEach((f, idx) => {
+          this.playVoice(f, { type: 'sine', attack: 0.04, duration: 0.28, amp: 0.72, pan, startOffset: idx * 0.17 });
+          this.playNoiseBurst({ noiseType: 'pink', duration: 0.14, amp: 0.2, pan, filterType: 'bandpass', filterFreq: f * 1.5, filterQ: 5, startOffset: idx * 0.17 });
+        });
+        break;
+      }
+      case 'mozart': {
+        // Mozart Queen of the Night Coloratura Staccato Arpeggio
+        const aria = [587.33, 698.46, 880.0, 1174.66, 1046.5, 880.0, 698.46, 1174.66];
+        aria.forEach((f, idx) => {
+          this.playFMVoice(f, { modRatio: 2.0, modIndex: 55, attack: 0.004, duration: 0.13, amp: 0.76, pan, startOffset: idx * 0.1 });
+        });
+        break;
+      }
+      case 'blues': {
+        // Louis Armstrong / Blind Willie Johnson Expressive Blues Slide
+        const blues = [293.66, 349.23, 392.0, 415.3, 392.0, 349.23, 293.66];
+        blues.forEach((f, idx) => {
+          this.playVoice(f, { type: 'sawtooth', detuneCents: 14, attack: 0.015, duration: 0.22, amp: 0.72, pan, filterType: 'lowpass', filterFreq: 1650, startOffset: idx * 0.15 });
+        });
+        break;
+      }
+      case 'stravinsky': {
+        // Stravinsky Rite of Spring Polyrhythmic Brass & Timpani Hits
+        [0, 0.16, 0.32, 0.44, 0.6, 0.76].forEach((t, idx) => {
+          this.playSubDrum(120, 38, { duration: 0.2, amp: 0.85, pan: idx % 2 === 0 ? -0.3 : 0.3, startOffset: t });
+          this.playVoice(idx % 2 === 0 ? 220.0 : 311.13, { type: 'sawtooth', duration: 0.14, amp: 0.65, pan, filterType: 'lowpass', filterFreq: 1800, startOffset: t });
+        });
+        break;
+      }
+      case 'guqin': {
+        // Chinese Liu Shui Guqin Plucked Zither Harmonics
+        const guqin = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 392.0];
+        guqin.forEach((f, idx) => {
+          this.playFMVoice(f, { modRatio: 3.0, modIndex: 95, attack: 0.003, duration: 0.35, amp: 0.72, pan: (idx - 3) * 0.15, startOffset: idx * 0.15 });
+        });
+        break;
+      }
+      case 'raga': {
+        // Indian Raga Bhairavi Tanpura Drone + Vocal Ornamentation
+        this.playVoice(138.59, { type: 'sawtooth', duration: 1.0, amp: 0.45, pan: -0.2, filterType: 'lowpass', filterFreq: 900 });
+        const raga = [277.18, 293.66, 329.63, 369.99, 415.3, 369.99, 329.63, 277.18];
+        raga.forEach((f, idx) => {
+          this.playFormantSyllable(f, 650, 1450, { duration: 0.16, amp: 0.74, pan: 0.1, startOffset: idx * 0.13 });
+        });
+        break;
+      }
+      case 'cavatina': {
+        // Beethoven String Quartet Op. 130 Cavatina Warm String Quartet
+        [155.56, 233.08, 311.13, 392.0].forEach((f, idx) => {
+          this.playVoice(f, { type: 'sawtooth', detuneCents: 10, attack: 0.06, duration: 0.85, amp: 0.55, pan: (idx - 1.5) * 0.3, filterType: 'lowpass', filterFreq: 1400, startOffset: idx * 0.05 });
         });
         break;
       }
@@ -1414,7 +1535,7 @@ class SonificationEngine {
 
     const { invertPitch = false, speak = false } = options;
     if (speak && layer.audioLegendSummary) {
-      this.speakGreeting(`${layer.title}. ${layer.audioLegendSummary}`, 'ru-RU');
+      this.speakGreeting(`${layer.title}. ${layer.audioLegendSummary}`, 'en-US');
     }
 
     const steps = [0.0, 0.25, 0.5, 0.75, 1.0];

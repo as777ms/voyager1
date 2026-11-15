@@ -33,6 +33,7 @@ export const useReceiverStore = create((set, get) => ({
   isDataExplorerOpen: false,
   isWorldMapOpen: false,
   isVoyagerModalOpen: false,
+  voyagerModalTab: 'greetings',
   activeSvsLayerId: 'svs-5153',
 
   // Accessibility
@@ -168,7 +169,12 @@ export const useReceiverStore = create((set, get) => ({
   setAccessibilityModalOpen: (isOpen) => set({ isAccessibilityModalOpen: Boolean(isOpen) }),
   setDataExplorerOpen: (isOpen) => set({ isDataExplorerOpen: Boolean(isOpen) }),
   setWorldMapOpen: (isOpen) => set({ isWorldMapOpen: Boolean(isOpen) }),
-  setVoyagerModalOpen: (isOpen) => set({ isVoyagerModalOpen: Boolean(isOpen) }),
+  setVoyagerModalOpen: (isOpen, tab) =>
+    set((s) => ({
+      isVoyagerModalOpen: Boolean(isOpen),
+      voyagerModalTab: tab || s.voyagerModalTab,
+    })),
+  setVoyagerModalTab: (tab) => set({ voyagerModalTab: tab }),
   setActiveSvsLayerId: (layerId) => set({ activeSvsLayerId: layerId }),
   closeAllModals: () => set({
     isDecodingKeyOpen: false,
