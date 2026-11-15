@@ -841,17 +841,18 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                           </button>
                         </div>
                       </div>
-                      <iframe
-                        key={activeYoutubeTrack.youtubeId}
-                        width="100%"
-                        height="220"
-                        src={`https://www.youtube-nocookie.com/embed/${activeYoutubeTrack.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
-                        title={activeYoutubeTrack.title}
-                        frameBorder="0"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
+                      <div className="relative w-full aspect-video max-h-[240px] sm:max-h-[320px] bg-black">
+                        <iframe
+                          key={activeYoutubeTrack.youtubeId}
+                          className="w-full h-full"
+                          src={`https://www.youtube-nocookie.com/embed/${activeYoutubeTrack.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+                          title={activeYoutubeTrack.title}
+                          frameBorder="0"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                      </div>
                       <div className="px-2.5 py-1 bg-[#070d1a] flex items-center justify-between text-[9px] font-mono text-slate-400 border-t border-slate-800">
                         <span className="truncate">{activeYoutubeTrack.performer}</span>
                         <a

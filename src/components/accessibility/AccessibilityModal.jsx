@@ -14,14 +14,19 @@ export default function AccessibilityModal() {
   const reducedMotion = useReceiverStore((s) => s.reducedMotion);
   const setReducedMotion = useReceiverStore((s) => s.setReducedMotion);
 
+  const isHoverAudioActive = useReceiverStore((s) => s.isHoverAudioActive);
+  const toggleHoverAudio = useReceiverStore((s) => s.toggleHoverAudio);
+
   if (!isOpen) return null;
 
   const shortcuts = [
     { key: 'Space', desc: 'Toggle Sonification Play / Pause' },
     { key: '→ / ←', desc: 'Next / Previous Data Observation' },
     { key: '1 to 7', desc: 'Switch Earth Station / Voyager Record' },
+    { key: 'H', desc: 'Toggle Hover Audio Reader (Voice + Earcons)' },
     { key: 'D', desc: 'Toggle Voyager Decoding Matrix' },
     { key: 'E', desc: 'Toggle Data Explorer Sidebar' },
+    { key: 'W', desc: 'Toggle NASA World Map Sonifier' },
     { key: 'M', desc: 'Mute / Unmute Audio Output' },
     { key: 'C', desc: 'Cycle 3D Camera Views' },
   ];
@@ -32,23 +37,23 @@ export default function AccessibilityModal() {
       aria-modal="true"
       aria-labelledby="accessibility-title"
       onClick={() => setOpen(false)}
-      className="fixed inset-0 z-50 pointer-events-auto flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
+      className="fixed inset-0 z-50 pointer-events-auto flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[95vw] sm:max-w-lg bg-[#0f1420] border-2 border-slate-700 rounded-2xl p-4 sm:p-6 shadow-2xl overflow-hidden text-gray-100 max-h-[88vh] flex flex-col font-sans"
+        className="relative w-full max-w-[96vw] sm:max-w-lg bg-[#0f1420] border-2 border-slate-700 rounded-2xl p-3.5 sm:p-6 shadow-2xl overflow-hidden text-gray-100 max-h-[92vh] sm:max-h-[88vh] flex flex-col font-sans"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-              <Eye className="w-6 h-6 text-cyan-400" />
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-800">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
+              <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
             </div>
-            <div>
-              <h2 id="accessibility-title" className="text-xl font-bold font-mono tracking-wide text-cyan-300">
+            <div className="min-w-0">
+              <h2 id="accessibility-title" className="text-base sm:text-xl font-bold font-mono tracking-wide text-cyan-300 truncate">
                 ACCESSIBILITY & CONTROL
               </h2>
-              <p className="text-xs text-gray-400 font-mono">
+              <p className="text-[10px] sm:text-xs text-gray-400 font-mono truncate">
                 Multimodal sonification adaptation & keyboard telemetry
               </p>
             </div>
@@ -56,7 +61,7 @@ export default function AccessibilityModal() {
           <button
             onClick={() => setOpen(false)}
             aria-label="Close Accessibility Settings"
-            className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -64,6 +69,31 @@ export default function AccessibilityModal() {
 
         {/* Settings switches */}
         <div className="overflow-y-auto custom-scrollbar my-4 space-y-3 flex-1 pr-1">
+          {/* Global Hover Audio Reader Mode */}
+          <div className="p-3.5 rounded-xl bg-gray-900 border border-emerald-500/30 flex items-center justify-between">
+            <div className="pr-4">
+              <div className="text-sm font-bold font-mono text-emerald-300">Hover Audio Reader [H]</div>
+              <div className="text-xs text-gray-400 mt-0.5">
+                Speaks button labels, telemetry values, and plays Web Audio earcons on hover or focus across all sections.
+              </div>
+            </div>
+            <button
+              onClick={toggleHoverAudio}
+              role="switch"
+              aria-checked={isHoverAudioActive}
+              aria-label="Toggle Global Hover Audio Reader"
+              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${
+                isHoverAudioActive ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-gray-800'
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white transition-transform absolute top-1 ${
+                  isHoverAudioActive ? 'left-7' : 'left-1'
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Invert Pitch */}
           <div className="p-3.5 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-between">
             <div className="pr-4">

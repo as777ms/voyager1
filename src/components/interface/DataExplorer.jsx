@@ -87,27 +87,36 @@ export default function DataExplorer() {
   };
 
   return (
-    <div
-      className={`fixed top-16 right-4 z-40 pointer-events-auto transition-transform duration-300 ease-out ${
-        isOpen ? 'translate-x-0' : 'translate-x-[calc(100%+1rem)]'
-      }`}
-    >
-      <div className="flex items-start">
-        {/* Toggle Handle */}
-        <button
-          type="button"
-          onClick={() => {
-            audioEngine.playHudPing(840);
-            setOpen(!isOpen);
-          }}
-          aria-label={isOpen ? 'Collapse Data Explorer' : 'Expand Data Explorer'}
-          className="-ml-10 p-2 bg-[#0b1325]/95 border border-cyan-500/50 rounded-l-xl text-cyan-300 hover:text-white shadow-xl backdrop-blur-md cursor-pointer mt-3"
-        >
-          {isOpen ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-        </button>
+    <>
+      {/* Mobile Backdrop (< sm) */}
+      {isOpen && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-35 sm:hidden pointer-events-auto"
+        />
+      )}
 
-        {/* Panel Content */}
-        <div className="y2k-window w-[88vw] sm:w-88 md:w-96 max-h-[78vh] flex flex-col rounded-xl shadow-2xl overflow-hidden text-gray-100">
+      <div
+        className={`fixed top-12 sm:top-16 right-2 sm:right-4 z-40 pointer-events-auto transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-[calc(100%+2rem)]'
+        }`}
+      >
+        <div className="flex items-start">
+          {/* Toggle Handle */}
+          <button
+            type="button"
+            onClick={() => {
+              audioEngine.playHudPing(840);
+              setOpen(!isOpen);
+            }}
+            aria-label={isOpen ? 'Collapse Data Explorer' : 'Expand Data Explorer'}
+            className="-ml-9 sm:-ml-10 p-1.5 sm:p-2 bg-[#0b1325]/95 border border-cyan-500/50 rounded-l-xl text-cyan-300 hover:text-white shadow-xl backdrop-blur-md cursor-pointer mt-3"
+          >
+            {isOpen ? <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" /> : <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />}
+          </button>
+
+          {/* Panel Content */}
+          <div className="y2k-window w-[92vw] sm:w-88 md:w-96 max-h-[82vh] flex flex-col rounded-xl shadow-2xl overflow-hidden text-gray-100">
           {/* Header */}
           <div className="p-3.5 border-b border-cyan-500/25 bg-[#071021]/90 space-y-2.5">
             <div className="flex items-center justify-between">
@@ -268,5 +277,6 @@ export default function DataExplorer() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -31,15 +31,40 @@ function ResponsiveCameraController() {
     const targetPos = preset.pos.clone();
     const targetLook = preset.target.clone();
 
-    // Adaptive framing for tablets & mobile screens so Alien and Earth stay well-framed
+    // Adaptive framing for mobile, phablet, tablet & desktop screens
+    const isMobile = size.width < 640;
+    const isTablet = size.width >= 640 && size.width < 1024;
+
     if (cameraPreset === 'overview') {
-      if (size.width < 640) {
-        targetPos.z += 2.6;
-        targetPos.y += 0.25;
-        targetLook.x = -0.35;
-      } else if (size.width < 1024) {
-        targetPos.z += 1.4;
+      if (isMobile) {
+        targetPos.z += 2.8;
+        targetPos.y += 0.35;
+        targetLook.x = -0.3;
+        targetLook.y = 0.15;
+      } else if (isTablet) {
+        targetPos.z += 1.5;
         targetLook.x = -0.25;
+      }
+    } else if (cameraPreset === 'alien') {
+      if (isMobile) {
+        targetPos.z += 2.2;
+        targetPos.y += 0.3;
+      } else if (isTablet) {
+        targetPos.z += 1.1;
+      }
+    } else if (cameraPreset === 'disc') {
+      if (isMobile) {
+        targetPos.z += 1.6;
+        targetPos.y += 0.4;
+      } else if (isTablet) {
+        targetPos.z += 0.8;
+      }
+    } else if (cameraPreset === 'earth') {
+      if (isMobile) {
+        targetPos.z += 2.2;
+        targetPos.y += 0.2;
+      } else if (isTablet) {
+        targetPos.z += 1.2;
       }
     }
 

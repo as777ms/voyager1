@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { NASA_STATIONS } from '../data/nasaData';
 import { getSvsLayerForStation } from '../data/svsLayers';
+import { audioEngine } from '../audio/AudioEngine';
 
 export const useReceiverStore = create((set, get) => ({
   // Active Station & Data Point
@@ -36,11 +37,14 @@ export const useReceiverStore = create((set, get) => ({
   voyagerModalTab: 'greetings',
   activeSvsLayerId: 'svs-5153',
 
-  // Accessibility
+  // Accessibility & Global Hover Audio Reader
   invertPitch: false,
   highContrast: false,
   reducedMotion: false,
   announcementText: 'System ready. The Receiver — An auditory gateway to Earth initialized.',
+  isHoverAudioActive: false,
+  hoverAnnounceText: '',
+  lastHoverSpoken: '',
 
   // Selectors
   getActiveStation: () => {
@@ -193,5 +197,52 @@ export const useReceiverStore = create((set, get) => ({
       ? Math.max(0, Math.min(1, intensity))
       : 0;
     set({ visualIntensity: safe });
+  },
+
+  // Global Hover Audio Reader actions
+  toggleHoverAudio: () => {
+    const next = !get().isHoverAudioActive;
+    audioEngine.unlockSync();
+    if (next) {
+      const welcome = 'Audio Reader Activated: Hover over any button or section to hear functions and telemetry.';
+      audioEngine.speakHoverCue(welcome, { rate: 1.15, actionType: 'toggle' });
+      set({
+        isHoverAudioActive: true,
+        hoverAnnounceText: welcome,
+        lastHoverSpoken: welcome,
+        announcementText: welcome,
+      });
+    } else {
+      audioEngine.stopHoverSpeech();
+      audioEngine.playEarcon('toggle');
+      set({
+        isHoverAudioActive: false,
+        hoverAnnounceText: '',
+        lastHoverSpoken: '',
+        announcementText: 'Audio Reader Deactivated.',
+      });
+    }
+  },
+
+  setHoverAudioActive: (isActive) => {
+    set({ isHoverAudioActive: Boolean(isActive) });
+  },
+
+  announceHover: (label, actionType = 'default') => {
+    if (!get().isHoverAudioActive || !label) return;
+    if (get().lastHoverSpoken === label) return;
+
+    set({
+      hoverAnnounceText: label,
+      lastHoverSpoken: label,
+      announcementText: label,
+    });
+    audioEngine.speakHoverCue(label, { rate: 1.15, actionType });
+  },
+
+  clearHover: () => {
+    setTimeout(() => {
+      set({ lastHoverSpoken: '' });
+    }, 120);
   },
 }));

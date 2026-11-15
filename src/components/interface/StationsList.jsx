@@ -17,6 +17,8 @@ export default function StationsList() {
   const selectedYear = useReceiverStore((s) => s.selectedYear);
   const setSelectedYear = useReceiverStore((s) => s.setSelectedYear);
   const setVoyagerModalOpen = useReceiverStore((s) => s.setVoyagerModalOpen);
+  const announceHover = useReceiverStore((s) => s.announceHover);
+  const clearHover = useReceiverStore((s) => s.clearHover);
 
   const [isMobileOpen, setMobileOpen] = useState(false);
   const [expandedNewsId, setExpandedNewsId] = useState(EARTH_SIGNAL_NEWS_CARDS[0].id);
@@ -37,13 +39,22 @@ export default function StationsList() {
 
   return (
     <>
+      {/* Mobile / Tablet Backdrop (< 1024px) */}
+      {isMobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+          className="fixed inset-0 bg-black/65 backdrop-blur-xs z-35 lg:hidden pointer-events-auto transition-opacity"
+        />
+      )}
+
       {/* Mobile / Tablet Drawer Toggle Button (< 1024px) */}
       <div className="lg:hidden pointer-events-auto fixed top-2.5 right-2.5 z-50">
         <button
           onClick={() => setMobileOpen(!isMobileOpen)}
           aria-expanded={isMobileOpen}
           aria-label="Toggle Earth Stations Dashboard"
-          className="y2k-window flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-white cursor-pointer"
+          className="y2k-window flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-white cursor-pointer shadow-lg"
         >
           {isMobileOpen ? (
             <>
@@ -60,13 +71,13 @@ export default function StationsList() {
         </button>
       </div>
 
-      {/* Pinned Full-Height Right Dashboard (Adaptive width for 1280px–1920px laptops) */}
+      {/* Pinned Full-Height Right Dashboard (Adaptive width for all screen sizes) */}
       <aside
         aria-label="Earth Stations Dashboard"
         className={`pointer-events-auto transition-all duration-300 ${
           isMobileOpen
-            ? 'fixed inset-y-3 right-3 w-[88vw] sm:w-[350px] z-40 flex flex-col rounded-xl'
-            : 'hidden lg:flex flex-col w-[290px] xl:w-[330px] 2xl:w-[360px] h-full shrink-0 rounded-xl'
+            ? 'fixed inset-y-2 right-2 sm:inset-y-3 sm:right-3 w-[calc(100vw-1rem)] sm:w-[350px] z-40 flex flex-col rounded-xl shadow-2xl'
+            : 'hidden lg:flex flex-col w-[280px] xl:w-[320px] 2xl:w-[360px] h-full shrink-0 rounded-xl'
         } y2k-window border border-cyan-500/25 overflow-hidden`}
       >
         {/* Top Window Titlebar */}
@@ -84,6 +95,9 @@ export default function StationsList() {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setVoyagerModalOpen(true)}
+              onMouseEnter={() => announceHover('Voyager Golden Record full 1977 archive modal', 'layer')}
+              onMouseLeave={clearHover}
+              onFocus={() => announceHover('Voyager Archive modal', 'layer')}
               className="y2k-gold-btn px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer"
             >
               <Disc className="w-3 h-3 animate-spin" style={{ animationDuration: '6s' }} />
@@ -95,10 +109,17 @@ export default function StationsList() {
         {/* Scrollable 3-Section Dashboard Body */}
         <div className="p-2.5 space-y-3 overflow-y-auto custom-scrollbar flex-1">
           {/* Holographic Voyager Golden Record Banner inside Playlist (as in reference image) */}
-         
-<button
-  onClick={() => setVoyagerModalOpen(true)}
-  aria-label="Explore the Voyager Golden Record"
+          <button
+            onClick={() => setVoyagerModalOpen(true)}
+            onMouseEnter={() =>
+              announceHover(
+                'Voyager Golden Record 1977: 55 world greetings, sounds of Earth, 27 songs, and 116 images. Click to explore.',
+                'layer'
+              )
+            }
+            onMouseLeave={clearHover}
+            onFocus={() => announceHover('Voyager Golden Record archive banner', 'layer')}
+            aria-label="Explore the Voyager Golden Record"
   className="
     w-full y2k-lcd rounded-xl p-3
     flex items-center gap-3
@@ -213,6 +234,13 @@ export default function StationsList() {
                 step="1"
                 value={selectedYear}
                 onChange={(e) => handleYearChange(Number(e.target.value))}
+                onMouseEnter={() =>
+                  announceHover(
+                    `Crisis timeline slider: year ${selectedYear}. Shifts planetary anomaly severity and audio pitch.`,
+                    'year'
+                  )
+                }
+                onMouseLeave={clearHover}
                 aria-label="Crisis Timeline Year Slider 2010 to 2026"
                 className="w-full accent-cyan-400 h-1.5 cursor-pointer"
               />
@@ -222,6 +250,9 @@ export default function StationsList() {
                   <button
                     key={yr}
                     onClick={() => handleYearChange(yr)}
+                    onMouseEnter={() => announceHover(`Select crisis observation year ${yr}`, 'year')}
+                    onMouseLeave={clearHover}
+                    onFocus={() => announceHover(`Select year ${yr}`, 'year')}
                     className={`text-[8px] font-mono px-1 py-0.5 rounded cursor-pointer transition-colors ${
                       selectedYear === yr
                         ? 'bg-cyan-400 text-black font-bold'

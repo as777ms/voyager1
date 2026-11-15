@@ -70,12 +70,12 @@ export default function SciFiLoader({ onEnter }) {
       />
 
       {/* Windows 2000s / Y2K Minimalist Aerospace Window Frame */}
-      <div className="relative z-10 w-full max-w-md bg-[#161c28] border-2 border-t-slate-500 border-l-slate-500 border-b-slate-900 border-r-slate-900 shadow-2xl p-1 select-none">
+      <div className="relative z-10 w-full max-w-[94vw] sm:max-w-md bg-[#161c28] border-2 border-t-slate-500 border-l-slate-500 border-b-slate-900 border-r-slate-900 shadow-2xl p-1 select-none">
         {/* Title Bar */}
         <div className="flex items-center justify-between px-2 py-1 bg-gradient-to-r from-[#0a2569] to-[#1e4a9e] text-white text-xs font-bold tracking-wide">
           <div className="flex items-center gap-1.5 truncate">
             <span className="w-2.5 h-2.5 bg-cyan-400 rounded-none inline-block" />
-            <span className="truncate">NASA JPL Telemetry — [Voyager Record System]</span>
+            <span className="truncate">NASA JPL Telemetry — [Voyager Record]</span>
           </div>
           {/* Classic Window Controls */}
           <div className="flex items-center gap-1 text-[10px] shrink-0 font-sans">
@@ -86,17 +86,17 @@ export default function SciFiLoader({ onEnter }) {
         </div>
 
         {/* Window Body */}
-        <div className="p-4 space-y-4 text-xs bg-[#121620] border border-slate-800 m-1">
+        <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 text-xs bg-[#121620] border border-slate-800 m-0.5 sm:m-1">
           {/* System description */}
-          <div className="border-b border-slate-800 pb-3">
+          <div className="border-b border-slate-800 pb-2.5 sm:pb-3">
             <div className="text-white font-bold text-sm tracking-wide">THE RECEIVER v2.6</div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
+            <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">
               NASA Space Apps 2026 • Earth Observation Sonification Pipeline
             </div>
           </div>
 
           {/* Telemetry Stream Diagnostics checklist */}
-          <div className="space-y-1.5 text-[11px] font-mono text-slate-300 bg-[#090c12] p-2.5 border border-slate-800 rounded-none">
+          <div className="space-y-1 sm:space-y-1.5 text-[10px] sm:text-[11px] font-mono text-slate-300 bg-[#090c12] p-2 sm:p-2.5 border border-slate-800 rounded-none">
             <div className="text-slate-400 mb-1 border-b border-slate-800/80 pb-1">
               SYSTEM INITIALIZATION PROTOCOL:
             </div>
@@ -158,7 +158,7 @@ export default function SciFiLoader({ onEnter }) {
             <button
               disabled={!isReady}
               onClick={handleEnter}
-              className={`px-5 py-2 text-xs font-bold tracking-wider uppercase transition-all border-2 ${
+              className={`w-full sm:w-auto px-5 py-2.5 sm:py-2 text-xs font-bold tracking-wider uppercase transition-all border-2 ${
                 isReady
                   ? 'bg-[#1e2a42] text-white border-t-slate-400 border-l-slate-400 border-b-slate-900 border-r-slate-900 active:border-t-slate-900 active:border-l-slate-900 active:border-b-slate-400 active:border-r-slate-400 hover:bg-[#283756] cursor-pointer'
                   : 'bg-[#151922] text-slate-600 border-slate-800 cursor-not-allowed'

@@ -61,23 +61,23 @@ export default function DecodingKeyModal() {
       aria-modal="true"
       aria-labelledby="decoding-key-title"
       onClick={() => setOpen(false)}
-      className="fixed inset-0 z-50 pointer-events-auto flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md"
+      className="fixed inset-0 z-50 pointer-events-auto flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-[95vw] sm:max-w-2xl bg-[#0f1420] border-2 border-slate-700 rounded-2xl p-4 sm:p-6 shadow-2xl overflow-hidden text-gray-100 max-h-[88vh] flex flex-col font-sans"
+        className="relative w-full max-w-[96vw] sm:max-w-2xl bg-[#0f1420] border-2 border-slate-700 rounded-2xl p-3 sm:p-6 shadow-2xl overflow-hidden text-gray-100 max-h-[92vh] sm:max-h-[88vh] flex flex-col font-sans"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-              <Disc className="w-6 h-6 text-amber-400 animate-spin" style={{ animationDuration: '10s' }} />
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-800">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
+              <Disc className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 animate-spin" style={{ animationDuration: '10s' }} />
             </div>
-            <div>
-              <h2 id="decoding-key-title" className="text-xl font-bold font-mono tracking-wide text-cyan-300">
+            <div className="min-w-0">
+              <h2 id="decoding-key-title" className="text-base sm:text-xl font-bold font-mono tracking-wide text-cyan-300 truncate">
                 VOYAGER DECODING MATRIX
               </h2>
-              <p className="text-xs text-gray-400 font-mono">
+              <p className="text-[10px] sm:text-xs text-gray-400 font-mono truncate">
                 Extraterrestrial Acoustic Interpretation Protocol • NASA Space Apps
               </p>
             </div>
@@ -85,33 +85,33 @@ export default function DecodingKeyModal() {
           <button
             onClick={() => setOpen(false)}
             aria-label="Close Decoding Key"
-            className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content list */}
-        <div className="overflow-y-auto custom-scrollbar my-4 pr-1 space-y-3 flex-1">
-          <div className="p-3 bg-cyan-950/30 rounded-xl border border-cyan-800/40 text-xs text-cyan-200 font-mono">
+        <div className="overflow-y-auto custom-scrollbar my-3 sm:my-4 pr-1 space-y-3 flex-1">
+          <div className="p-2.5 sm:p-3 bg-cyan-950/30 rounded-xl border border-cyan-800/40 text-[11px] sm:text-xs text-cyan-200 font-mono">
             <strong>TRANSMISSION NOTICE:</strong> The alien listener does not possess human language. The Voyager disc translates Earth observations through physical properties of acoustic waves:
           </div>
 
           {decodingMappings.map((item, index) => (
             <div
               key={index}
-              className="p-4 rounded-xl bg-gray-900/80 border border-gray-800 hover:border-cyan-500/30 transition-all"
+              className="p-3 sm:p-4 rounded-xl bg-gray-900/80 border border-gray-800 hover:border-cyan-500/30 transition-all space-y-2"
             >
-              <div className="flex items-center justify-between gap-3 mb-1.5">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="p-2 rounded-lg bg-gray-800/80 border border-gray-700/60 shrink-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gray-800/80 border border-gray-700/60 shrink-0">
                     {item.icon}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold font-mono text-cyan-300 truncate">
+                    <h3 className="text-xs sm:text-sm font-bold font-mono text-cyan-300 truncate">
                       {item.property}
                     </h3>
-                    <div className="text-xs text-amber-400/90 font-mono font-semibold truncate">
+                    <div className="text-[11px] sm:text-xs text-amber-400/90 font-mono font-semibold truncate">
                       {item.meaning}
                     </div>
                   </div>
@@ -120,18 +120,18 @@ export default function DecodingKeyModal() {
                 <button
                   type="button"
                   onClick={() => audioEngine.playDecodingDemo(index)}
-                  className="y2k-aqua-btn px-2.5 py-1 rounded-md text-[10px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+                  className="y2k-aqua-btn px-2.5 py-1 rounded-md text-[10px] font-mono font-bold flex items-center justify-center gap-1 shrink-0 cursor-pointer self-start sm:self-auto"
                 >
                   <Play className="w-3 h-3 fill-current" />
                   <span>HEAR DEMO</span>
                 </button>
               </div>
 
-              <p className="text-xs text-gray-300 leading-relaxed pl-11">
+              <p className="text-[11px] sm:text-xs text-gray-300 leading-relaxed sm:pl-11">
                 {item.explanation}
               </p>
 
-              <div className="mt-2 text-[11px] text-gray-400 pl-11 font-mono border-t border-gray-800/80 pt-1.5">
+              <div className="text-[10px] sm:text-[11px] text-gray-400 sm:pl-11 font-mono border-t border-gray-800/80 pt-1.5">
                 <span className="text-cyan-400 font-semibold">Active Context:</span> {item.datasetContext}
               </div>
             </div>

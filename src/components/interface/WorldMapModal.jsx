@@ -45,6 +45,9 @@ export default function WorldMapModal() {
   const invertPitch = useReceiverStore((s) => s.invertPitch);
   const activeSvsLayerId = useReceiverStore((s) => s.activeSvsLayerId);
   const setActiveSvsLayerId = useReceiverStore((s) => s.setActiveSvsLayerId);
+  const hoverProbeAudio = useReceiverStore((s) => s.isHoverAudioActive);
+  const toggleHoverAudio = useReceiverStore((s) => s.toggleHoverAudio);
+  const globalAnnounceText = useReceiverStore((s) => s.hoverAnnounceText);
 
   const canvasRef = useRef(null);
   const baseMapImageRef = useRef(null);
@@ -63,7 +66,6 @@ export default function WorldMapModal() {
   const [audioState, setAudioState] = useState(() => audioEngine.getAudioState());
 
   const [isScanning, setIsScanning] = useState(false);
-  const [hoverProbeAudio, setHoverProbeAudio] = useState(false);
   const [scanX, setScanX] = useState(360);
   const [cvReadout, setCvReadout] = useState(null);
   const [compareResult, setCompareResult] = useState(null);
@@ -110,23 +112,6 @@ export default function WorldMapModal() {
     }, 140);
   }, []);
 
-  const toggleHoverAudio = useCallback(() => {
-    audioEngine.unlockSync();
-    setHoverProbeAudio((v) => {
-      const next = !v;
-      if (next) {
-        const welcome = 'Audio Reader Activated: Hover over any button or map coordinate to hear functions and sound signatures.';
-        setAudioReaderText(welcome);
-        useReceiverStore.setState({ announcementText: welcome });
-        audioEngine.speakHoverCue(welcome, { rate: 1.12, actionType: 'toggle' });
-      } else {
-        setAudioReaderText('');
-        audioEngine.stopHoverSpeech();
-      }
-      return next;
-    });
-  }, []);
-
   // Cancel comparison timeout safely
   const cancelCompare = useCallback(() => {
     if (compareTimerRef.current) {
@@ -140,7 +125,6 @@ export default function WorldMapModal() {
     setIsScanning(false);
     cancelCompare();
     setYearOverride(null);
-    setHoverProbeAudio(false);
     audioEngine.stopHoverSpeech();
     setWorldMapOpen(false);
   }, [cancelCompare, setWorldMapOpen]);
@@ -688,7 +672,7 @@ export default function WorldMapModal() {
     <AnimatePresence>
       {isWorldMapOpen && (
         <div
-          className="pointer-events-auto fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm"
+          className="pointer-events-auto fixed inset-0 z-50 flex items-center justify-center p-1.5 sm:p-3 md:p-4 bg-black/75 backdrop-blur-sm"
           onClick={handleCloseModal}
         >
           <motion.div
@@ -697,7 +681,7 @@ export default function WorldMapModal() {
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.18 }}
             onClick={(e) => e.stopPropagation()}
-            className="y2k-window w-full max-w-5xl max-h-[94vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-cyan-500/35"
+            className="y2k-window w-full max-w-5xl max-h-[96vh] sm:max-h-[94vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-cyan-500/35"
           >
             {/* 1. Metallic Top Bar + Audio Unlock Pill + Live Satellite Status */}
             <div className="y2k-titlebar px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 border-b border-slate-700/80 shrink-0">
@@ -778,7 +762,7 @@ export default function WorldMapModal() {
                     <Volume2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
                     <span className="font-extrabold uppercase text-emerald-300 shrink-0">AUDIO READER ACTIVE:</span>
                     <span className="truncate text-white font-medium">
-                      {audioReaderText || "Hover over any button, scale key, or Earth map pixel..."}
+                      {audioReaderText || globalAnnounceText || "Hover over any button, scale key, or Earth map pixel..."}
                     </span>
                   </div>
                   <span className="text-[9px] text-emerald-400/90 shrink-0 hidden sm:inline bg-emerald-900/50 px-2 py-0.5 rounded border border-emerald-500/30">
@@ -1067,7 +1051,23 @@ export default function WorldMapModal() {
                         audioEngine.unlockSync();
                         handleProbeAtClientCoords(e.clientX, e.clientY, true);
                       }}
-                      className="w-full h-auto block cursor-crosshair select-none"
+                      onTouchStart={(e) => {
+                        if (e.touches && e.touches[0]) {
+                          audioEngine.unlockSync();
+                          setIsScanning(false);
+                          handleProbeAtClientCoords(e.touches[0].clientX, e.touches[0].clientY, true);
+                        }
+                      }}
+                      onTouchMove={(e) => {
+                        if (e.touches && e.touches[0]) {
+                          const now = performance.now();
+                          if (now - lastHoverSoundRef.current < 130) return;
+                          lastHoverSoundRef.current = now;
+                          audioEngine.unlockSync();
+                          handleProbeAtClientCoords(e.touches[0].clientX, e.touches[0].clientY, true);
+                        }
+                      }}
+                      className="w-full h-auto block cursor-crosshair select-none touch-none"
                     />
 
                     {/* Non-Destructive Overlay: Selected Country Reticle + Scanline + Hotspots */}
