@@ -15,22 +15,10 @@ import {
 } from 'lucide-react';
 import { useReceiverStore } from '../../store/useReceiverStore';
 import { VOYAGER_GOLDEN_RECORD_TRACKS } from '../../data/nasaData';
+import { VOYAGER_GREETINGS_55 } from '../../data/voyagerGreetings55';
 import { audioEngine } from '../../audio/AudioEngine';
 
-const GREETINGS_LANGUAGES = [
-  { id: 'g-en', lang: 'English', text: '"Hello from the children of planet Earth."', spoken: 'Hello from the children of planet Earth.', langCode: 'en-US', era: 'Modern', freq: 261.63 },
-  { id: 'g-ru', lang: 'Russian', text: '"Zdravstvuyte! Privetstvuyu vas!" ("Greetings! I welcome you!")', spoken: 'Greetings! I welcome you from planet Earth.', langCode: 'en-US', era: 'Modern', freq: 293.66 },
-  { id: 'g-fa', lang: 'Persian / Tajik', text: '"Dorud bar sakinan-e mawra-ye aseman-ha." ("Greetings to the residents of far skies.")', spoken: 'Greetings to the residents of far skies.', langCode: 'en-US', era: 'Modern / Silk Road', freq: 466.16 },
-  { id: 'g-zh', lang: 'Mandarin Chinese', text: '"Ge wei dou hao ba?" ("Best wishes from all the people of Earth.")', spoken: 'Best wishes from all the people of Earth.', langCode: 'en-US', era: 'Modern', freq: 329.63 },
-  { id: 'g-es', lang: 'Spanish', text: '"Hola y saludos a todos." ("Hello and greetings to all.")', spoken: 'Hello and greetings to all.', langCode: 'en-US', era: 'Modern', freq: 349.23 },
-  { id: 'g-fr', lang: 'French', text: '"Bonjour tout le monde." ("Hello everyone.")', spoken: 'Hello everyone.', langCode: 'en-US', era: 'Modern', freq: 392.0 },
-  { id: 'g-ja', lang: 'Japanese', text: '"Konnichiwa. Ogenki desu ka?" ("Hello. How are you?")', spoken: 'Hello. How are you?', langCode: 'en-US', era: 'Modern', freq: 440.0 },
-  { id: 'g-ar', lang: 'Arabic', text: '"Tahiyatuna lil-asdiqa fi al-nujum." ("Greetings to our friends in the stars.")', spoken: 'Greetings to our friends in the stars.', langCode: 'en-US', era: 'Modern', freq: 493.88 },
-  { id: 'g-su', lang: 'Sumerian', text: '"Silim-ma he-me-en." ("May all be well.")', spoken: 'Silim ma he me en. May all be well.', langCode: 'en-GB', era: 'Ancient (c. 3000 BCE)', freq: 220.0 },
-  { id: 'g-ak', lang: 'Akkadian', text: '"Adannis lu sulmu." ("May all be very well.")', spoken: 'Adannish lu shulmu. May all be very well with you.', langCode: 'en-GB', era: 'Ancient (c. 2400 BCE)', freq: 246.94 },
-  { id: 'g-el', lang: 'Ancient Greek', text: '"Oitines pot este, chairete." ("Greetings whoever you are.")', spoken: 'Greetings whoever you are. We come in friendship.', langCode: 'en-US', era: 'Classical', freq: 311.13 },
-  { id: 'g-la', lang: 'Latin', text: '"Salvete quicumque estis." ("Greetings, whoever you may be.")', spoken: 'Greetings, whoever you may be; we have goodwill toward you.', langCode: 'en-US', era: 'Classical', freq: 369.99 },
-];
+const GREETINGS_LANGUAGES = VOYAGER_GREETINGS_55;
 
 const ARCHIVE_WAV_STREAMS = [
   {
@@ -63,21 +51,148 @@ const NASA_EARTH_SOUNDS = [
 const VOYAGER_WORLD_MUSIC = VOYAGER_GOLDEN_RECORD_TRACKS;
 
 const VOYAGER_ENCODED_IMAGES = [
-  { id: 'img-circle', frame: '#001', title: 'Calibration Circle', category: '512x512 Aspect Calibration', desc: 'Binary reference circle etched on the cover so extraterrestrials can align scanlines.' },
-  { id: 'img-solar', frame: '#004', title: 'Solar System & Planetary Diameters', category: 'Astrophysics Diagram', desc: 'Mathematical table of Sun and planets by mass, density, and orbital distance.' },
-  { id: 'img-earth', frame: '#006', title: 'Full Earth from Orbit (Apollo)', category: 'Planetary Photograph', desc: 'Color composite encoded as 3 sequential R-G-B monochrome scanline frames.' },
-  { id: 'img-dna', frame: '#012', title: 'DNA Double Helix Structure', category: 'Molecular Biology', desc: 'Deoxyribonucleic acid replication diagram showing terrestrial genetic code.' },
-  { id: 'img-human', frame: '#019', title: 'Human Anatomy & Silhouette', category: 'Anthropology', desc: 'Frank Drake & Carl Sagan anatomical diagrams of human organs and life cycle.' },
-  { id: 'img-continents', frame: '#029', title: 'Continental Drift (Pangaea → Now)', category: 'Plate Tectonics', desc: 'Three-era map of Earth’s crust from 1.5 billion years ago to present continents.' },
-  { id: 'img-taj', frame: '#095', title: 'Human Architecture & Mountain Bridges', category: 'Civilization', desc: 'Engineering landmarks, suspension bridges, and alpine mountain roads.' },
-  { id: 'img-launch', frame: '#111', title: 'Titan-Centaur Launch of Voyager', category: 'Space Exploration', desc: 'Cape Canaveral liftoff sending the Golden Record into interstellar space.' },
+  {
+    id: 'img-circle',
+    frame: '#001',
+    title: 'Calibration Circle',
+    category: '512x512 Aspect Calibration',
+    desc: 'Binary reference circle etched on the cover so extraterrestrials can verify 512x512 aspect ratio.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Calibration-circle.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-solar-spectra',
+    frame: '#008',
+    title: 'Solar Spectra & Chemistry',
+    category: 'Astrophysics',
+    desc: 'Absorption lines and spectral bands of the Sun establishing terrestrial chemical measurement units.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Voyager_Golden_Record_008._Spectra.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-mercury',
+    frame: '#009',
+    title: 'Planet Mercury',
+    category: 'Solar System',
+    desc: 'Orbital survey photograph of the innermost rocky planet of our solar system.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Voyager_golden_record_9_mercury.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-mars',
+    frame: '#010',
+    title: 'Planet Mars',
+    category: 'Solar System',
+    desc: 'Mariner orbital imagery showing Martian craters, impact basins, and thin carbon-dioxide atmosphere.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Voyager_golden_record_10_mars.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-jupiter',
+    frame: '#011',
+    title: 'Planet Jupiter',
+    category: 'Gas Giant',
+    desc: 'Pioneer 10 full-disk image of Jupiter showing the Great Red Spot and atmospheric storm belts.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Voyager_golden_record_11_jupiter.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-earth',
+    frame: '#012',
+    title: 'Planet Earth from Orbit',
+    category: 'Planetary Science',
+    desc: 'Apollo photographic composite of planet Earth showing oceans, cloud systems, and continental landmasses.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Voyager_golden_record_12_earth.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-earth-terminator',
+    frame: '#013',
+    title: 'Earth & Day-Night Terminator',
+    category: 'Planetary Science',
+    desc: 'Global view of planet Earth demonstrating orbital day/night diurnal lighting conditions.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Voyager_golden_record_13_earth.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-tetons',
+    frame: '#042',
+    title: 'The Tetons & Snake River (Ansel Adams)',
+    category: 'Biosphere & Landscape',
+    desc: 'Iconic photograph representing Earth’s pristine mountain ranges, river valleys, and forests.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/37/Voyager_Golden_Record_042._Snake_River_and_Grand_Tetons.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-supermarket',
+    frame: '#076',
+    title: 'Supermarket & Food Distribution',
+    category: 'Human Civilization',
+    desc: 'Photograph demonstrating modern agricultural harvest, commercial distribution, and human food supply.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/36/Voyager_Golden_Record_076._Supermarket.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-eating',
+    frame: '#081',
+    title: 'Demonstration of Eating & Drinking',
+    category: 'Human Physiology',
+    desc: 'Photographic documentation of human ingestion, nutrition, and hydration mechanics.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Voyager_Golden_Record_081._Demonstration_of_licking%2C_eating_and_drinking.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-highway',
+    frame: '#103',
+    title: 'Highway & Transportation Grid',
+    category: 'Civilization',
+    desc: 'Golden Gate transit network and highway infrastructure showing terrestrial vehicular travel.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Voyager_golden_record_103_highway.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-arecibo',
+    frame: '#110',
+    title: 'Arecibo Radio Telescope',
+    category: 'Interstellar Communication',
+    desc: 'The 305-meter radio telescope in Puerto Rico used for radio astronomy and deep space transmission.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Voyager_golden_record_110_arecibo.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-newton',
+    frame: '#111',
+    title: 'Newton’s "System of the World"',
+    category: 'Physics & Science',
+    desc: 'Page from Isaac Newton’s Principia Mathematica illustrating planetary orbits and gravitational physics.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Voyager_golden_record_111_systemoftheworld.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-astronaut',
+    frame: '#112',
+    title: 'Astronaut in Spacewalk',
+    category: 'Space Exploration',
+    desc: 'Extravehicular activity in low Earth orbit documenting human spaceflight capability.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/26/Voyager_golden_record_112_astronaut.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-launch',
+    frame: '#113',
+    title: 'Titan-Centaur Launch of Voyager',
+    category: 'Space Exploration',
+    desc: 'Cape Canaveral liftoff sending the Voyager probes and Golden Record into interstellar space.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Voyager_golden_record_113_launch.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
+  {
+    id: 'img-score',
+    frame: '#116',
+    title: 'Beethoven String Quartet Score',
+    category: 'Human Arts & Music',
+    desc: 'Musical manuscript of Cavatina from String Quartet No. 13 in B-flat Major, Op. 130 by Ludwig van Beethoven.',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/32/Voyager_golden_record_116_score.gif?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled',
+  },
 ];
 
 export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnClose } = {}) {
   const [activeSoundId, setActiveSoundId] = useState(null);
   const [activeYoutubeTrack, setActiveYoutubeTrack] = useState(null);
   const [isTourPlaying, setIsTourPlaying] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState(() =>
+    typeof window !== 'undefined' && 'speechSynthesis' in window
+      ? window.speechSynthesis.getVoices() || []
+      : []
+  );
+  const [greetingStatus, setGreetingStatus] = useState(null);
   const modalBodyRef = useRef(null);
+  const tourRunIdRef = useRef(0);
 
   const activeStation = useReceiverStore((s) => s.getActiveStation());
   const storeIsOpen = useReceiverStore((s) => s.isVoyagerModalOpen);
@@ -88,15 +203,28 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
   const isOpen = propIsOpen !== undefined ? propIsOpen : storeIsOpen;
 
   const stopAllModalAudio = () => {
+    tourRunIdRef.current += 1;
     setIsTourPlaying(false);
+    setActiveSoundId(null);
+    setGreetingStatus(null);
     audioEngine.stopActiveSequences();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return undefined;
+    const syncVoices = () => {
+      setAvailableVoices(window.speechSynthesis.getVoices() || []);
+    };
+    syncVoices();
+    window.speechSynthesis.addEventListener?.('voiceschanged', syncVoices);
+    return () => {
+      window.speechSynthesis.removeEventListener?.('voiceschanged', syncVoices);
+    };
+  }, []);
 
   const handleClose = () => {
     stopAllModalAudio();
+    setActiveYoutubeTrack(null);
     if (propOnClose) propOnClose();
     setVoyagerModalOpen(false);
   };
@@ -105,10 +233,11 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
     if (!isOpen) return undefined;
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
+        tourRunIdRef.current += 1;
+        setIsTourPlaying(false);
+        setActiveSoundId(null);
+        setActiveYoutubeTrack(null);
         audioEngine.stopActiveSequences();
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-        }
         if (propOnClose) propOnClose();
         setVoyagerModalOpen(false);
       }
@@ -118,18 +247,21 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
   }, [isOpen, propOnClose, setVoyagerModalOpen]);
 
   const playGreetingCard = (item) => {
-    audioEngine.unlockSync();
-    audioEngine.stopActiveSequences();
+    tourRunIdRef.current += 1;
     setIsTourPlaying(false);
     setActiveSoundId(item.id);
-    audioEngine.playDataPoint('voyagerRecord', {
-      id: item.id,
-      frequency: item.freq,
-      noteName: 'C4',
-      longitude: 0,
-      audioCategory: 'speech',
-      spokenText: item.spoken,
+    const result = audioEngine.playVoyagerGreetingItem(item, {
+      onEnded: () => {
+        setActiveSoundId((cur) => (cur === item.id ? null : cur));
+      },
+    });
+    setGreetingStatus({
+      order: item.order,
+      lang: item.lang,
       langCode: item.langCode,
+      speaker: item.speaker,
+      mode: result.mode,
+      voiceName: result.voice?.name || null,
     });
   };
 
@@ -186,23 +318,32 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
     setIsTourPlaying(true);
 
     if (activeTab === 'greetings') {
-      GREETINGS_LANGUAGES.forEach((item, idx) => {
-        audioEngine.scheduleTimer(() => {
-          setActiveSoundId(item.id);
-          audioEngine.playDataPoint('voyagerRecord', {
-            id: item.id,
-            frequency: item.freq,
-            noteName: 'C4',
-            longitude: ((idx % 5) - 2) * 55,
-            audioCategory: 'speech',
-            spokenText: item.spoken,
-            langCode: item.langCode,
-          });
-          if (idx === GREETINGS_LANGUAGES.length - 1) {
-            audioEngine.scheduleTimer(() => setIsTourPlaying(false), 1100);
-          }
-        }, idx * 1250);
-      });
+      const runId = ++tourRunIdRef.current;
+      const playStep = (idx) => {
+        if (tourRunIdRef.current !== runId) return;
+        if (idx >= GREETINGS_LANGUAGES.length) {
+          setIsTourPlaying(false);
+          setActiveSoundId(null);
+          return;
+        }
+        const item = GREETINGS_LANGUAGES[idx];
+        setActiveSoundId(item.id);
+        const result = audioEngine.playVoyagerGreetingItem(item, {
+          onEnded: () => {
+            if (tourRunIdRef.current !== runId) return;
+            audioEngine.scheduleTimer(() => playStep(idx + 1), 260);
+          },
+        });
+        setGreetingStatus({
+          order: item.order,
+          lang: item.lang,
+          langCode: item.langCode,
+          speaker: item.speaker,
+          mode: result.mode,
+          voiceName: result.voice?.name || null,
+        });
+      };
+      playStep(0);
     } else if (activeTab === 'nasaSounds') {
       NASA_EARTH_SOUNDS.forEach((snd, idx) => {
         audioEngine.scheduleTimer(() => {
@@ -397,29 +538,50 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-300">
                         <Radio className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                        GREETINGS IN 55 LANGUAGES (LOCAL SYNTH + SOUNDCLOUD)
+                        GREETINGS IN {GREETINGS_LANGUAGES.length} LANGUAGES (NASA VOYAGER ARCHIVE)
                       </div>
                       <div className="text-[10px] text-slate-300 mt-0.5">
-                        Click any language card below for instant local vocal-formant + speech synthesis (works even if Brave blocks SoundCloud).
+                        Every card plays the real 1977 recording of that language from the Golden Record (original speakers, public-domain NASA audio). PLAY ALL runs through all 55 in record order.
                       </div>
                     </div>
                     <a
-                      href="https://soundcloud.com/flying-classroom/greetings-in-55-languages"
+                      href="https://science.nasa.gov/mission/voyager/golden-record-contents/greetings/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="y2k-gold-btn px-2.5 py-1 font-mono font-bold text-[10px] rounded-lg flex items-center gap-1 shrink-0 cursor-pointer"
                     >
-                      <span>SOUNDCLOUD</span>
+                      <span>NASA.GOV</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
 
+                  {greetingStatus && (
+                    <div
+                      className={`mb-2.5 px-2.5 py-1.5 rounded-lg border text-[10px] font-mono flex items-center justify-between gap-2 ${
+                        greetingStatus.mode === 'unsupported'
+                          ? 'bg-amber-500/10 border-amber-400/40 text-amber-200'
+                          : 'bg-emerald-500/10 border-emerald-400/40 text-emerald-200'
+                      }`}
+                    >
+                      <span className="truncate">
+                        #{greetingStatus.order} {greetingStatus.lang} ({greetingStatus.langCode}):{' '}
+                        {greetingStatus.mode === 'audio'
+                          ? `Playing original 1977 Golden Record voice${greetingStatus.speaker ? ` — ${greetingStatus.speaker}` : ''}`
+                          : greetingStatus.mode === 'speech'
+                          ? `Speaking with browser voice "${greetingStatus.voiceName}"`
+                          : 'No matching browser voice or individual audio URL available — listen via full SoundCloud track below'}
+                      </span>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
                     {GREETINGS_LANGUAGES.map((item) => {
                       const isCurrent = activeSoundId === item.id;
+                      const support = audioEngine.getGreetingPlaybackSupport(item, availableVoices);
                       return (
                         <button
                           key={item.id}
+                          type="button"
                           onClick={() => playGreetingCard(item)}
                           className={`text-left p-2.5 rounded-lg transition-all cursor-pointer flex items-center justify-between gap-2 ${
                             isCurrent
@@ -429,12 +591,33 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 text-xs font-bold font-mono text-amber-300">
+                              <span className="text-[10px] text-cyan-300/80 shrink-0">#{item.order}</span>
                               <span className="truncate">{item.lang}</span>
                               <span className="text-[9px] text-slate-400 font-normal shrink-0">[{item.era}]</span>
                             </div>
-                            <p className="text-[11px] text-slate-200 italic mt-0.5 truncate">
-                              {item.text}
+                            <p className="text-[11px] text-white mt-0.5 truncate" title={item.originalText}>
+                              {item.originalText}
                             </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <p className="text-[10px] text-slate-300 italic truncate flex-1" title={item.translation}>
+                                &ldquo;{item.translation}&rdquo;
+                              </p>
+                              <span
+                                className={`text-[8px] font-mono px-1 py-0.2 rounded border shrink-0 ${
+                                  support === 'audio'
+                                    ? 'bg-cyan-500/15 border-cyan-400/50 text-cyan-300'
+                                    : support === 'speech'
+                                    ? 'bg-emerald-500/15 border-emerald-400/50 text-emerald-300'
+                                    : 'bg-slate-800/80 border-slate-600 text-slate-400'
+                                }`}
+                              >
+                                {support === 'audio'
+                                  ? 'AUDIO'
+                                  : support === 'speech'
+                                  ? item.langCode
+                                  : `NO VOICE (${item.langCode})`}
+                              </span>
+                            </div>
                           </div>
                           <div className="y2k-gold-btn w-7 h-7 rounded-md flex items-center justify-center shrink-0">
                             <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
@@ -608,41 +791,78 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                   </div>
 
                   {activeYoutubeTrack && (
-                    <div className="mb-3 rounded-lg overflow-hidden border border-amber-400/60 bg-black shadow-lg">
-                      <div className="px-2.5 py-1.5 bg-[#0a1326] flex items-center justify-between text-[10px] font-mono border-b border-amber-400/30 gap-2">
-                        <span className="text-amber-300 font-bold truncate">
-                          NOW STREAMING #{activeYoutubeTrack.num}: {activeYoutubeTrack.title}
+                    <div className="sticky top-0 z-20 mb-3 rounded-lg overflow-hidden border border-amber-400/70 bg-black shadow-[0_12px_32px_rgba(0,0,0,0.9)]">
+                      <div className="px-2.5 py-1.5 bg-[#0a1326] flex flex-wrap items-center justify-between text-[10px] font-mono border-b border-amber-400/30 gap-2">
+                        <span className="text-amber-300 font-bold truncate min-w-0 flex-1">
+                          NOW WATCHING #{activeYoutubeTrack.num}: {activeYoutubeTrack.title}
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const idx = VOYAGER_WORLD_MUSIC.findIndex((t) => t.id === activeYoutubeTrack.id);
+                              const prevIdx = (idx - 1 + VOYAGER_WORLD_MUSIC.length) % VOYAGER_WORLD_MUSIC.length;
+                              stopAllModalAudio();
+                              setActiveYoutubeTrack(VOYAGER_WORLD_MUSIC[prevIdx]);
+                            }}
+                            className="text-slate-200 hover:text-white px-2 py-0.5 rounded bg-slate-800 border border-slate-600 cursor-pointer"
+                            title="Previous track video"
+                          >
+                            ‹ PREV
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const idx = VOYAGER_WORLD_MUSIC.findIndex((t) => t.id === activeYoutubeTrack.id);
+                              const nextIdx = (idx + 1) % VOYAGER_WORLD_MUSIC.length;
+                              stopAllModalAudio();
+                              setActiveYoutubeTrack(VOYAGER_WORLD_MUSIC[nextIdx]);
+                            }}
+                            className="text-slate-200 hover:text-white px-2 py-0.5 rounded bg-slate-800 border border-slate-600 cursor-pointer"
+                            title="Next track video"
+                          >
+                            NEXT ›
+                          </button>
                           <a
                             href={activeYoutubeTrack.youtubeUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-cyan-300 hover:text-white px-1.5 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40 flex items-center gap-1"
+                            className="text-cyan-200 hover:text-white px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-400/50 flex items-center gap-1 font-bold"
                           >
-                            <span>OPEN YT</span>
+                            <span>OPEN ON YOUTUBE</span>
                             <ExternalLink className="w-2.5 h-2.5" />
                           </a>
                           <button
                             type="button"
                             onClick={() => setActiveYoutubeTrack(null)}
-                            className="text-slate-300 hover:text-white px-1.5 py-0.5 rounded bg-slate-800 cursor-pointer"
+                            className="text-rose-200 hover:text-white px-2 py-0.5 rounded bg-rose-950/70 border border-rose-500/40 cursor-pointer"
                           >
-                            HIDE PLAYER
+                            CLOSE
                           </button>
                         </div>
                       </div>
                       <iframe
                         key={activeYoutubeTrack.youtubeId}
                         width="100%"
-                        height="200"
-                        src={`https://www.youtube.com/embed/${activeYoutubeTrack.youtubeId}?autoplay=1&rel=0`}
+                        height="220"
+                        src={`https://www.youtube-nocookie.com/embed/${activeYoutubeTrack.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
                         title={activeYoutubeTrack.title}
                         frameBorder="0"
                         referrerPolicy="strict-origin-when-cross-origin"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                       />
+                      <div className="px-2.5 py-1 bg-[#070d1a] flex items-center justify-between text-[9px] font-mono text-slate-400 border-t border-slate-800">
+                        <span className="truncate">{activeYoutubeTrack.performer}</span>
+                        <a
+                          href={activeYoutubeTrack.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-amber-300 hover:text-amber-200 underline shrink-0 ml-2"
+                        >
+                          Video blocked? Open YouTube link ↗
+                        </a>
+                      </div>
                     </div>
                   )}
 
@@ -674,7 +894,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0">
-                            <button
+                            {/* <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -685,7 +905,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                             >
                               <Play className="w-3 h-3 fill-current" />
                               <span>PLAY</span>
-                            </button>
+                            </button> */}
 
                             <button
                               type="button"
@@ -749,7 +969,7 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                     </a>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {VOYAGER_ENCODED_IMAGES.map((img) => {
                       const isCurrent = activeSoundId === img.id;
                       return (
@@ -757,26 +977,41 @@ export default function VoyagerAudioModal({ isOpen: propIsOpen, onClose: propOnC
                           key={img.id}
                           type="button"
                           onClick={() => playImageCard(img)}
-                          className={`text-left p-2.5 rounded-lg transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                          className={`text-left p-2 rounded-lg transition-all cursor-pointer flex items-center gap-2.5 ${
                             isCurrent
                               ? 'y2k-lcd border-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.3)]'
-                              : 'y2k-metal-btn'
+                              : 'y2k-metal-btn hover:border-cyan-400/50'
                           }`}
                         >
+                          {/* Real Analog Encoded Image from Voyager Golden Record */}
+                          <div className="relative w-16 h-16 rounded overflow-hidden shrink-0 border border-cyan-500/40 bg-black/80 flex items-center justify-center">
+                            {img.imageUrl ? (
+                              <img
+                                src={img.imageUrl}
+                                alt={img.title}
+                                loading="lazy"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="w-6 h-6 text-cyan-400/50" />
+                            )}
+                            <span className="absolute bottom-0 inset-x-0 bg-black/80 text-[7.5px] font-mono text-cyan-300 text-center py-0.5 leading-none">
+                              {img.frame}
+                            </span>
+                          </div>
+
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 text-xs font-bold font-mono text-cyan-300">
-                              <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 border border-cyan-400/40 text-[9px] text-amber-300 shrink-0">
-                                {img.frame}
-                              </span>
                               <span className="truncate text-white">{img.title}</span>
                             </div>
-                            <div className="text-[9px] font-mono text-cyan-300/80 mt-0.5">
-                              {img.category} • 512x512 Scanline Groove
+                            <div className="text-[9px] font-mono text-cyan-300/80 mt-0.5 truncate">
+                              {img.category} • 512 Scanlines
                             </div>
-                            <p className="text-[10px] text-slate-300 mt-0.5 line-clamp-1">
+                            <p className="text-[10px] font-mono text-slate-300 mt-0.5 line-clamp-2 leading-tight">
                               {img.desc}
                             </p>
                           </div>
+
                           <div className="y2k-aqua-btn w-7 h-7 rounded-md flex items-center justify-center shrink-0">
                             <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                           </div>

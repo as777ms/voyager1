@@ -87,6 +87,46 @@ export default function WorldMapModal() {
     return () => clearInterval(id);
   }, [isWorldMapOpen]);
 
+  // Live Audio Reader subtitle state for visual feedback + screen reader
+  const [audioReaderText, setAudioReaderText] = useState('');
+  const lastHoverSpokenRef = useRef('');
+
+  const announceControl = useCallback(
+    (label, actionType = 'default') => {
+      if (!hoverProbeAudio) return;
+      setAudioReaderText(label);
+      useReceiverStore.setState({ announcementText: label });
+      if (lastHoverSpokenRef.current === label) return;
+      lastHoverSpokenRef.current = label;
+
+      audioEngine.speakHoverCue(label, { rate: 1.15, actionType });
+    },
+    [hoverProbeAudio]
+  );
+
+  const clearHoverControl = useCallback(() => {
+    setTimeout(() => {
+      lastHoverSpokenRef.current = '';
+    }, 140);
+  }, []);
+
+  const toggleHoverAudio = useCallback(() => {
+    audioEngine.unlockSync();
+    setHoverProbeAudio((v) => {
+      const next = !v;
+      if (next) {
+        const welcome = 'Audio Reader Activated: Hover over any button or map coordinate to hear functions and sound signatures.';
+        setAudioReaderText(welcome);
+        useReceiverStore.setState({ announcementText: welcome });
+        audioEngine.speakHoverCue(welcome, { rate: 1.12, actionType: 'toggle' });
+      } else {
+        setAudioReaderText('');
+        audioEngine.stopHoverSpeech();
+      }
+      return next;
+    });
+  }, []);
+
   // Cancel comparison timeout safely
   const cancelCompare = useCallback(() => {
     if (compareTimerRef.current) {
@@ -100,19 +140,25 @@ export default function WorldMapModal() {
     setIsScanning(false);
     cancelCompare();
     setYearOverride(null);
+    setHoverProbeAudio(false);
+    audioEngine.stopHoverSpeech();
     setWorldMapOpen(false);
   }, [cancelCompare, setWorldMapOpen]);
 
   useEffect(() => {
-    if (!isWorldMapOpen && compareTimerRef.current) {
-      clearTimeout(compareTimerRef.current);
-      compareTimerRef.current = null;
+    if (!isWorldMapOpen) {
+      if (compareTimerRef.current) {
+        clearTimeout(compareTimerRef.current);
+        compareTimerRef.current = null;
+      }
+      audioEngine.stopHoverSpeech();
     }
     return () => {
       if (compareTimerRef.current) {
         clearTimeout(compareTimerRef.current);
         compareTimerRef.current = null;
       }
+      audioEngine.stopHoverSpeech();
     };
   }, [isWorldMapOpen]);
 
@@ -343,6 +389,22 @@ export default function WorldMapModal() {
       audioEngine.playProbeChord(probe, activeLayer);
       setAudioState(audioEngine.getAudioState());
     }
+
+    // Blind accessibility: announce hotspot name and value when cursor crosses nearby
+    if (hoverProbeAudio && activeLayer.hotspots) {
+      const nearbySpot = activeLayer.hotspots.find((spot) => {
+        const dLon = Math.abs(spot.lon - probe.lon);
+        const dLat = Math.abs(spot.lat - probe.lat);
+        return dLon < 10 && dLat < 7;
+      });
+      if (nearbySpot && lastHoverSpokenRef.current !== nearbySpot.name) {
+        lastHoverSpokenRef.current = nearbySpot.name;
+        audioEngine.speakHoverCue(
+          `Hotspot: ${nearbySpot.name}, ${probe.physicalValue} ${activeLayer.unit}`,
+          { rate: 1.15, playPing: false }
+        );
+      }
+    }
   };
 
   const handleSonifyCountry = () => {
@@ -383,9 +445,61 @@ export default function WorldMapModal() {
     });
 
     audioEngine.playRegionSweep(analysis, activeLayer);
+    if (hoverProbeAudio) {
+      audioEngine.speakHoverCue(
+        `Sonifying ${selectedRegion.label}. Year ${renderYear}. Mean value: ${analysis.physicalMean} ${activeLayer.unit}. Chord: ${analysis.overallChord?.chordName}`,
+        { rate: 1.15, playPing: false }
+      );
+    }
   };
 
-  const handleComparePeriods = () => {
+  const handleYearChange = (yr) => {
+    audioEngine.unlockSync();
+    cancelCompare();
+    setCompareResult(null);
+    setYearOverride(yr);
+    setSelectedYear(yr);
+    drawCanvas(yr);
+
+    const ctx = readCanvasContext();
+    if (ctx && activeLayer) {
+      const analysis = analyzeRegionBoundingBox(
+        ctx,
+        selectedRegion.bounds,
+        CANVAS_WIDTH,
+        CANVAS_HEIGHT,
+        activeLayer,
+        { invertPitch }
+      );
+      if (analysis) {
+        setCvReadout({
+          sourceLabel: `${selectedRegion.label} (${yr})`,
+          redPct: analysis.redPct,
+          greenPct: analysis.greenPct,
+          bluePct: analysis.bluePct,
+          hue: analysis.hue,
+          hex: analysis.hex,
+          brightnessPct: analysis.brightnessPct,
+          densityPct: analysis.densityPct,
+          physicalValue: analysis.physicalMean,
+          peakValue: analysis.physicalPeak,
+          unit: activeLayer.unit,
+          binaryPulse: analysis.binaryPulse,
+          chord: analysis.overallChord,
+          pan: 0,
+        });
+        audioEngine.playRegionSweep(analysis, activeLayer);
+        if (hoverProbeAudio) {
+          audioEngine.speakHoverCue(
+            `Observation year ${yr}. Mean: ${analysis.physicalMean} ${activeLayer.unit}. Brightness: ${analysis.brightnessPct} percent. Chord: ${analysis.overallChord?.chordName}`,
+            { rate: 1.15, playPing: true }
+          );
+        }
+      }
+    }
+  };
+
+  const handleComparePeriods = (customYrA = 2010, customYrB = 2026) => {
     audioEngine.unlockSync();
     setAudioState(audioEngine.getAudioState());
     setIsScanning(false);
@@ -394,12 +508,21 @@ export default function WorldMapModal() {
     const ctx = readCanvasContext();
     if (!ctx || !activeLayer) return;
 
-    const [yrA, yrB] = activeLayer.compareYears || [2012, 2023];
+    const yrA = Number(customYrA) || 2010;
+    const yrB = Number(customYrB) || 2026;
     setIsComparing(true);
     setCompareResult({ phase: 'PERIOD_A', yrA, yrB });
 
+    if (hoverProbeAudio) {
+      audioEngine.speakHoverCue(
+        `Starting comparison across ${selectedRegion.label}. Playing Period A: year ${yrA} baseline.`,
+        { rate: 1.1, playPing: true }
+      );
+    }
+
     // Period A render + capture + play
     setYearOverride(yrA);
+    setSelectedYear(yrA);
     renderSvsCanvasLayer(canvasRef.current, activeLayer, {
       year: yrA,
       baseMapImage: useLiveGibs ? baseMapImageRef.current : null,
@@ -440,6 +563,7 @@ export default function WorldMapModal() {
       if (!ctxB) return;
 
       setYearOverride(yrB);
+      setSelectedYear(yrB);
       renderSvsCanvasLayer(canvasRef.current, activeLayer, {
         year: yrB,
         baseMapImage: useLiveGibs ? baseMapImageRef.current : null,
@@ -471,6 +595,7 @@ export default function WorldMapModal() {
           pan: 0,
         });
         audioEngine.playRegionSweep(resB, activeLayer);
+        const bDelta = resB.brightnessPct - (resA?.brightnessPct ?? 0);
         setCompareResult({
           phase: 'DONE',
           yrA,
@@ -485,6 +610,14 @@ export default function WorldMapModal() {
           velA: resA?.overallChord?.midiVelocity ?? 35,
           velB: resB.overallChord?.midiVelocity ?? 35,
         });
+
+        if (hoverProbeAudio) {
+          const deltaWord = bDelta >= 0 ? 'increased by' : 'decreased by';
+          audioEngine.speakHoverCue(
+            `Period B year ${yrB} anomaly. Brightness ${deltaWord} ${Math.abs(bDelta)} percent. Mean value is ${resB.physicalMean} ${activeLayer.unit}. Chord shifted from ${resA?.overallChord?.chordName || 'C4'} to ${resB.overallChord?.chordName || 'G5'}.`,
+            { rate: 1.15, playPing: false }
+          );
+        }
       }
       setIsComparing(false);
     }, 2350);
@@ -508,6 +641,7 @@ export default function WorldMapModal() {
       binaryPulse: stop.t >= (activeLayer.binaryThreshold ?? 0.6) ? 1 : 0,
       chord,
     };
+    const physVal = normalizedToPhysical(stop.t, activeLayer);
     setCvReadout({
       sourceLabel: `Legend Stop: ${stop.label}`,
       redPct: Math.round((stop.rgb[0] / 255) * 100),
@@ -517,14 +651,20 @@ export default function WorldMapModal() {
       hex: stop.hex,
       brightnessPct: Math.round(((0.299 * stop.rgb[0] + 0.587 * stop.rgb[1] + 0.114 * stop.rgb[2]) / 255) * 100),
       densityPct: stop.t >= (activeLayer.binaryThreshold ?? 0.6) ? 100 : 15,
-      physicalValue: normalizedToPhysical(stop.t, activeLayer),
-      peakValue: normalizedToPhysical(stop.t, activeLayer),
+      physicalValue: physVal,
+      peakValue: physVal,
       unit: activeLayer.unit,
       binaryPulse: probe.binaryPulse,
       chord,
       pan: 0,
     });
     audioEngine.playProbeChord(probe, activeLayer);
+    if (hoverProbeAudio) {
+      audioEngine.speakHoverCue(
+        `Scale stop ${stop.label}. Physical value ${physVal} ${activeLayer.unit}. Chord ${chord.chordName}`,
+        { rate: 1.15, playPing: false }
+      );
+    }
   };
 
   // Compute SVG percentage coordinates for the selected Country/Region reticle box
@@ -589,6 +729,9 @@ export default function WorldMapModal() {
                     audioEngine.playTestTone();
                     setAudioState(audioEngine.getAudioState());
                   }}
+                  onMouseEnter={() => announceControl("Unlock and test Web Audio synthesizer", "toggle")}
+                  onMouseLeave={clearHoverControl}
+                  onFocus={() => announceControl("Unlock and test Web Audio synthesizer", "toggle")}
                   title="Test & Unlock Web Audio Synthesizer"
                   className={`px-2.5 py-1 rounded text-[9px] font-mono font-bold flex items-center gap-1.5 border cursor-pointer transition-all ${
                     audioState === 'running'
@@ -602,6 +745,9 @@ export default function WorldMapModal() {
 
                 <button
                   onClick={() => setUseLiveGibs((v) => !v)}
+                  onMouseEnter={() => announceControl(useLiveGibs ? "NASA GIBS satellite imagery feed active. Click to switch to offline relief." : "NASA GIBS satellite imagery feed disabled. Click to enable.", "toggle")}
+                  onMouseLeave={clearHoverControl}
+                  onFocus={() => announceControl("NASA GIBS satellite imagery feed toggle", "toggle")}
                   className={`y2k-metal-btn px-2 py-1 rounded text-[9px] font-mono font-bold cursor-pointer ${
                     useLiveGibs ? 'text-cyan-200 border-cyan-400/50' : 'text-slate-400'
                   }`}
@@ -612,6 +758,9 @@ export default function WorldMapModal() {
 
                 <button
                   onClick={handleCloseModal}
+                  onMouseEnter={() => announceControl("Close Earth Jukebox Map", "close")}
+                  onMouseLeave={clearHoverControl}
+                  onFocus={() => announceControl("Close Earth Jukebox Map", "close")}
                   aria-label="Close Earth Jukebox Map"
                   className="y2k-metal-btn p-1 rounded text-slate-300 hover:text-white cursor-pointer"
                 >
@@ -622,6 +771,22 @@ export default function WorldMapModal() {
 
             {/* Scrollable Body */}
             <div className="p-3 sm:p-4 overflow-y-auto space-y-3">
+              {/* Audio Reader Live Telemetry Banner (when active) */}
+              {hoverProbeAudio && (
+                <div className="bg-emerald-950/70 border border-emerald-400/50 rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 text-[10px] font-mono text-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Volume2 className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
+                    <span className="font-extrabold uppercase text-emerald-300 shrink-0">AUDIO READER ACTIVE:</span>
+                    <span className="truncate text-white font-medium">
+                      {audioReaderText || "Hover over any button, scale key, or Earth map pixel..."}
+                    </span>
+                  </div>
+                  <span className="text-[9px] text-emerald-400/90 shrink-0 hidden sm:inline bg-emerald-900/50 px-2 py-0.5 rounded border border-emerald-500/30">
+                    Dual Web Audio Earcons + Voice
+                  </span>
+                </div>
+              )}
+
               {/* 2. Eight Official NASA SVS Resource Tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                 {SVS_LAYERS.map((layer) => {
@@ -630,6 +795,9 @@ export default function WorldMapModal() {
                     <button
                       key={layer.id}
                       onClick={() => handleSelectLayer(layer)}
+                      onMouseEnter={() => announceControl(`Dataset: ${layer.shortName}, NASA SVS ${layer.svsId}`, "layer")}
+                      onMouseLeave={clearHoverControl}
+                      onFocus={() => announceControl(`Dataset: ${layer.shortName}, NASA SVS ${layer.svsId}`, "layer")}
                       className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
                         active
                           ? 'bg-cyan-500/25 border-cyan-300 text-white shadow-[0_0_12px_rgba(56,189,248,0.3)]'
@@ -664,6 +832,9 @@ export default function WorldMapModal() {
                   href={activeLayer.svsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onMouseEnter={() => announceControl(`External reference: open NASA Scientific Visualization Studio ${activeLayer.svsId} in browser`, "layer")}
+                  onMouseLeave={clearHoverControl}
+                  onFocus={() => announceControl(`External reference: open NASA SVS ${activeLayer.svsId}`, "layer")}
                   className="y2k-metal-btn px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold text-cyan-300 hover:text-white flex items-center gap-1 shrink-0"
                 >
                   <span>NASA SVS #{activeLayer.svsId}</span>
@@ -681,6 +852,9 @@ export default function WorldMapModal() {
                   </label>
                   <select
                     value={selectedRegionId}
+                    onMouseEnter={() => announceControl("Select geographic region for sonic analysis", "region")}
+                    onMouseLeave={clearHoverControl}
+                    onFocus={() => announceControl("Select geographic region for sonic analysis", "region")}
                     onChange={(e) => {
                       const nextId = e.target.value;
                       audioEngine.unlockSync();
@@ -698,6 +872,9 @@ export default function WorldMapModal() {
                         );
                         if (analysis) {
                           audioEngine.playRegionSweep(analysis, activeLayer);
+                          if (hoverProbeAudio) {
+                            announceControl(`Region selected: ${nextRegion.label}. Mean value: ${analysis.physicalMean} ${activeLayer.unit}`, "region");
+                          }
                         }
                       }
                     }}
@@ -712,6 +889,9 @@ export default function WorldMapModal() {
 
                   <button
                     onClick={handleSonifyCountry}
+                    onMouseEnter={() => announceControl("Sonify Region: scans selected territory and plays synthesized multi-octave chord", "sonify")}
+                    onMouseLeave={clearHoverControl}
+                    onFocus={() => announceControl("Sonify Region", "sonify")}
                     className="y2k-aqua-btn px-3 py-1 rounded-lg text-[10px] font-mono font-extrabold text-slate-950 flex items-center gap-1 cursor-pointer"
                   >
                     <Play className="w-3 h-3 fill-current" />
@@ -719,18 +899,34 @@ export default function WorldMapModal() {
                   </button>
 
                   <button
-                    onClick={handleComparePeriods}
+                    onClick={() => handleComparePeriods(2010, 2026)}
                     disabled={isComparing}
+                    onMouseEnter={() => announceControl("Compare 2010 baseline against 2026 crisis anomaly: dual-phase sweep measuring delta shift", "compare")}
+                    onMouseLeave={clearHoverControl}
+                    onFocus={() => announceControl("Compare 2010 baseline against 2026 crisis anomaly", "compare")}
                     className="y2k-gold-btn px-3 py-1 rounded-lg text-[10px] font-mono font-extrabold text-slate-950 flex items-center gap-1 cursor-pointer disabled:opacity-60"
-                    title={`Compare ${compareYears[0]} vs ${compareYears[1]} pixels & chords`}
+                    title="Compare 2010 baseline vs 2026 crisis anomaly pixels & chords"
                   >
                     <GitCompare className="w-3 h-3" />
                     <span>
                       {isComparing
-                        ? 'COMPARING...'
-                        : `COMPARE ${compareYears[0]} ↔ ${compareYears[1]}`}
+                        ? `COMPARING ${compareResult?.yrA ?? 2010} ↔ ${compareResult?.yrB ?? 2026}...`
+                        : 'COMPARE 2010 ↔ 2026 (16-YR DELTA)'}
                     </span>
                   </button>
+
+                  {compareYears && (compareYears[0] !== 2010 || compareYears[1] !== 2026) && (
+                    <button
+                      onClick={() => handleComparePeriods(compareYears[0], compareYears[1])}
+                      disabled={isComparing}
+                      onMouseEnter={() => announceControl(`Compare SVS archive years ${compareYears[0]} against ${compareYears[1]}`, "compare")}
+                      onMouseLeave={clearHoverControl}
+                      onFocus={() => announceControl(`Compare SVS archive years ${compareYears[0]} against ${compareYears[1]}`, "compare")}
+                      className="y2k-metal-btn px-2 py-1 rounded-lg text-[9px] font-mono font-bold text-amber-300 hover:text-white cursor-pointer disabled:opacity-60"
+                    >
+                      <span>SVS: {compareYears[0]} ↔ {compareYears[1]}</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Right: Full Planet Scan, Calibrate Scale, Hover Probe, Year Scrub */}
@@ -742,6 +938,9 @@ export default function WorldMapModal() {
                       cancelCompare();
                       setIsScanning((s) => !s);
                     }}
+                    onMouseEnter={() => announceControl(isScanning ? "Stop planetary scan" : "Scan Planet: continuous orbital meridian scan from west to east", "scan")}
+                    onMouseLeave={clearHoverControl}
+                    onFocus={() => announceControl(isScanning ? "Stop scan" : "Scan Planet", "scan")}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border flex items-center gap-1 cursor-pointer ${
                       isScanning
                         ? 'bg-rose-500/25 border-rose-400 text-rose-200'
@@ -758,6 +957,9 @@ export default function WorldMapModal() {
                       setAudioState(audioEngine.getAudioState());
                       audioEngine.playScaleCalibration(activeLayer, { invertPitch, speak: false });
                     }}
+                    onMouseEnter={() => announceControl("Calibrate Key: plays audio spectrum from lowest to highest data value", "calibrate")}
+                    onMouseLeave={clearHoverControl}
+                    onFocus={() => announceControl("Calibrate Key: plays audio spectrum", "calibrate")}
                     className="y2k-metal-btn px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-amber-200 hover:text-white flex items-center gap-1 cursor-pointer"
                   >
                     <Waves className="w-3 h-3" />
@@ -765,13 +967,13 @@ export default function WorldMapModal() {
                   </button>
 
                   <button
-                    onClick={() => {
-                      audioEngine.unlockSync();
-                      setHoverProbeAudio((v) => !v);
-                    }}
+                    onClick={toggleHoverAudio}
+                    onMouseEnter={() => announceControl(hoverProbeAudio ? "Hover Audio active: announces map coordinates and interface buttons" : "Hover Audio off: click to enable blind accessibility mode", "toggle")}
+                    onMouseLeave={clearHoverControl}
+                    onFocus={() => announceControl("Hover Audio toggle", "toggle")}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border flex items-center gap-1 cursor-pointer ${
                       hoverProbeAudio
-                        ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200'
+                        ? 'bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
                         : 'y2k-metal-btn text-slate-300 hover:text-white'
                     }`}
                   >
@@ -780,16 +982,20 @@ export default function WorldMapModal() {
                   </button>
 
                   <div className="flex items-center gap-1 bg-slate-950/90 border border-slate-700 rounded-lg px-2 py-0.5">
-                    {compareYears.map((yr) => (
+                    <span className="text-[9px] font-mono text-cyan-300 font-bold mr-0.5">YEAR:</span>
+                    {[2010, 2014, 2018, 2022, 2026].map((yr) => (
                       <button
                         key={yr}
-                        onClick={() => {
-                          audioEngine.unlockSync();
-                          setYearOverride(yr);
-                          setSelectedYear(yr);
-                        }}
-                        className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold cursor-pointer ${
-                          renderYear === yr ? 'bg-cyan-500 text-slate-950' : 'text-slate-300 hover:text-white'
+                        onClick={() => handleYearChange(yr)}
+                        onMouseEnter={() => announceControl(`Select Observation Year ${yr}`, "year")}
+                        onMouseLeave={clearHoverControl}
+                        onFocus={() => announceControl(`Select Observation Year ${yr}`, "year")}
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold cursor-pointer transition-colors ${
+                          renderYear === yr
+                            ? yr >= 2022
+                              ? 'bg-rose-500 text-white font-extrabold shadow-[0_0_8px_rgba(244,63,94,0.6)]'
+                              : 'bg-cyan-400 text-slate-950 font-extrabold'
+                            : 'text-slate-300 hover:text-white'
                         }`}
                       >
                         {yr}
@@ -846,6 +1052,8 @@ export default function WorldMapModal() {
                       ref={canvasRef}
                       width={CANVAS_WIDTH}
                       height={CANVAS_HEIGHT}
+                      onMouseEnter={() => announceControl("Interactive Earth Canvas: move cursor across pixels to sonify chords in real time", "scan")}
+                      onMouseLeave={clearHoverControl}
                       onClick={(e) => {
                         audioEngine.unlockSync();
                         setIsScanning(false);
@@ -916,6 +1124,9 @@ export default function WorldMapModal() {
                         <button
                           key={stop.label}
                           onClick={() => handleStopClickColorStop(stop)}
+                          onMouseEnter={() => announceControl(`Scale Stop: ${stop.label}. Click to hear reference chord.`, "calibrate")}
+                          onMouseLeave={clearHoverControl}
+                          onFocus={() => announceControl(`Scale Stop: ${stop.label}`, "calibrate")}
                           className="y2k-metal-btn px-2 py-1 rounded-lg flex items-center gap-2 text-left cursor-pointer hover:border-cyan-400/60"
                         >
                           <span
@@ -931,7 +1142,11 @@ export default function WorldMapModal() {
 
                 {/* Right 4 Cols: Real-Time Computer-Vision -> Chandra/NASA-IMPACT Formula Readout */}
                 <div className="lg:col-span-4 space-y-2.5">
-                  <div className="y2k-lcd rounded-xl p-3 space-y-2.5 border border-cyan-500/35">
+                  <div
+                    onMouseEnter={() => announceControl("Computer Vision telemetry: live RGB energy split, brightness, and MIDI chords", "layer")}
+                    onMouseLeave={clearHoverControl}
+                    className="y2k-lcd rounded-xl p-3 space-y-2.5 border border-cyan-500/35"
+                  >
                     <div className="flex items-center justify-between border-b border-cyan-500/20 pb-1.5">
                       <span className="text-[10px] font-mono font-extrabold text-cyan-300 uppercase flex items-center gap-1.5">
                         <Activity className="w-3.5 h-3.5" />

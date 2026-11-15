@@ -8,7 +8,6 @@ import {
   VolumeX,
   Radio,
   Globe,
-  Music,
 } from 'lucide-react';
 import { useReceiverStore } from '../../store/useReceiverStore';
 import { getSvsLayerById } from '../../data/svsLayers';
@@ -32,7 +31,6 @@ export default function AudioControls() {
   const selectedYear = useReceiverStore((s) => s.selectedYear);
   const getYearTelemetry = useReceiverStore((s) => s.getYearTelemetry);
   const setWorldMapOpen = useReceiverStore((s) => s.setWorldMapOpen);
-  const setVoyagerModalOpen = useReceiverStore((s) => s.setVoyagerModalOpen);
   const activeSvsLayerId = useReceiverStore((s) => s.activeSvsLayerId);
   const activeSvsLayer = getSvsLayerById(activeSvsLayerId);
 
@@ -146,27 +144,35 @@ export default function AudioControls() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                onClick={() => setVoyagerModalOpen(true, 'worldMusic')}
-                title="Open all 27 Voyager Golden Record Music Tracks"
-                className="y2k-gold-btn px-2 py-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer"
-              >
-                <Music className="w-3 h-3" />
-                <span className="hidden sm:inline">27 TRACKS</span>
-                <span className="sm:hidden">27</span>
-              </button>
+            
+<div className="flex items-center gap-1.5 shrink-0">
+  <button
+    onClick={() => setWorldMapOpen(true)}
+    title={`Open NASA Worldview EIC Map (SVS #${activeSvsLayer.svsId})`}
+    aria-label="Open NASA World Map"
+    className="
+      y2k-aqua-btn
+      px-3 sm:px-4
+      py-2
+      rounded-md
+      text-[11px] sm:text-xs
+      font-mono font-bold tracking-wider
+      flex items-center justify-center gap-2
+      shrink-0 cursor-pointer
+      border border-cyan-300/50
+      shadow-[0_0_10px_rgba(34,211,238,0.25)]
+      hover:shadow-[0_0_18px_rgba(34,211,238,0.55)]
+      hover:scale-105
+      active:scale-95
+      transition-all duration-200
+    "
+  >
+    <Globe className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+    <span className="hidden md:inline">WORLD MAP</span>
+    <span className="md:hidden">MAP</span>
+  </button>
+</div>
 
-              <button
-                onClick={() => setWorldMapOpen(true)}
-                title={`Open NASA Worldview EIC Map (SVS #${activeSvsLayer.svsId})`}
-                className="y2k-aqua-btn px-2 sm:px-2.5 py-1 rounded text-[10px] font-mono font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">WORLD MAP [W]</span>
-                <span className="md:hidden">MAP</span>
-              </button>
-            </div>
           </div>
 
           {/* Center: Transport Buttons */}

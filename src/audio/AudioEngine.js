@@ -189,6 +189,22 @@ class SonificationEngine {
   stopActiveSequences() {
     this.activeTimers.forEach((id) => clearTimeout(id));
     this.activeTimers.clear();
+    if (this._greetingSpeechTimer) {
+      clearTimeout(this._greetingSpeechTimer);
+      this._greetingSpeechTimer = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // Ignore speech cancel errors
+      }
+    }
+    this._activeGreetingUtterance = null;
+    if (this._segmentCleanup) {
+      this._segmentCleanup();
+      this._segmentCleanup = null;
+    }
     if (this.activeStreamAudio) {
       try {
         this.activeStreamAudio.pause();
@@ -218,6 +234,111 @@ class SonificationEngine {
     audio.play().catch((err) => {
       console.warn('Archive stream playback blocked or unavailable:', err);
     });
+    return audio;
+  }
+
+  /**
+   * Plays [start, end) seconds of an audio file. The HTMLAudioElement is cached per URL,
+   * so a long source recording is downloaded once and then seeked for each segment.
+   */
+  playAudioSegment(url, start = 0, end = null, { onEnded = null, onError = null } = {}) {
+    this.stopActiveSequences();
+    if (typeof window === 'undefined' || !url) {
+      if (onError) onError();
+      return null;
+    }
+
+    if (!this._segmentAudioCache) this._segmentAudioCache = new Map();
+    let audio = this._segmentAudioCache.get(url);
+    if (!audio) {
+      audio = new window.Audio();
+      audio.preload = 'auto';
+      audio.src = url;
+      this._segmentAudioCache.set(url, audio);
+    }
+
+    const token = {};
+    this._activeSegmentToken = token;
+    let finished = false;
+
+    const cleanup = () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('ended', onNaturalEnd);
+      audio.removeEventListener('error', onLoadError);
+      if (this._segmentStopTimer) {
+        clearTimeout(this._segmentStopTimer);
+        this._segmentStopTimer = null;
+      }
+    };
+    const finish = () => {
+      if (finished || this._activeSegmentToken !== token) return;
+      finished = true;
+      cleanup();
+      audio.pause();
+      if (this.activeStreamAudio === audio) this.activeStreamAudio = null;
+      this._activeSegmentToken = null;
+      if (onEnded) onEnded();
+    };
+    const onTimeUpdate = () => {
+      if (end != null && audio.currentTime >= end) finish();
+    };
+    const onNaturalEnd = () => finish();
+    const onLoadError = () => {
+      if (finished || this._activeSegmentToken !== token) return;
+      finished = true;
+      cleanup();
+      this._activeSegmentToken = null;
+      this._segmentAudioCache.delete(url);
+      console.warn('Voyager greeting recording unavailable:', url);
+      if (onError) onError();
+    };
+
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', onNaturalEnd);
+    audio.addEventListener('error', onLoadError);
+    audio.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.currentVolume));
+    this.activeStreamAudio = audio;
+    this._segmentCleanup = () => {
+      finished = true;
+      cleanup();
+      this._activeSegmentToken = null;
+    };
+
+    const startPlayback = () => {
+      if (this._activeSegmentToken !== token) return;
+      try {
+        audio.currentTime = start;
+      } catch {
+        // Some browsers throw if metadata isn't ready
+      }
+
+      // If audio is currently seeking, wait for 'seeked' before starting timer and playing
+      const onReadyToPlay = () => {
+        if (this._activeSegmentToken !== token) return;
+        audio.play().then(() => {
+          if (end != null && this._activeSegmentToken === token) {
+            const ms = Math.max(0, (end - audio.currentTime) * 1000);
+            this._segmentStopTimer = setTimeout(finish, ms + 40);
+          }
+        }).catch((err) => {
+          console.warn('Greeting playback blocked or failed:', err);
+          onLoadError();
+        });
+      };
+
+      if (audio.seeking) {
+        audio.addEventListener('seeked', onReadyToPlay, { once: true });
+      } else {
+        onReadyToPlay();
+      }
+    };
+
+    if (audio.readyState >= 1) {
+      startPlayback();
+    } else {
+      audio.addEventListener('loadedmetadata', startPlayback, { once: true });
+      audio.load();
+    }
     return audio;
   }
 
@@ -527,19 +648,161 @@ class SonificationEngine {
     osc.stop(tEnd + 0.02);
   }
 
-  speakGreeting(text, langCode = 'en-US') {
-    try {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = langCode;
-        utterance.rate = 0.94;
-        utterance.pitch = 1.0;
-        window.speechSynthesis.speak(utterance);
-      }
-    } catch {
-      // Formant synth already provides melodic voice
+  /**
+   * Matches a BCP-47 language tag to an available browser SpeechSynthesisVoice.
+   * Never silently substitutes an English voice for a non-English language.
+   */
+  findMatchingVoice(langCode, providedVoices = null) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !langCode) {
+      return null;
     }
+    const voices = providedVoices || window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+
+    const normTarget = String(langCode).replace(/_/g, '-').toLowerCase().trim();
+    const targetBase = normTarget.split('-')[0];
+
+    // 1. Exact BCP-47 tag match
+    const exact = voices.find((v) => v.lang && v.lang.replace(/_/g, '-').toLowerCase() === normTarget);
+    if (exact) return exact;
+
+    // 2. Language-family aliases (e.g. nb <-> no, yue <-> zh-hk)
+    const baseAliases = {
+      nb: ['nb', 'no'],
+      no: ['no', 'nb', 'nn'],
+      yue: ['yue', 'zh-hk'],
+    };
+    const allowedBases = baseAliases[targetBase] || [targetBase];
+
+    const familyMatch = voices.find((v) => {
+      if (!v.lang) return false;
+      const vNorm = v.lang.replace(/_/g, '-').toLowerCase();
+      const vBase = vNorm.split('-')[0];
+      // Never allow an English voice to match a non-English request
+      if (targetBase !== 'en' && vBase === 'en') return false;
+      return allowedBases.includes(vNorm) || allowedBases.includes(vBase);
+    });
+
+    return familyMatch || null;
+  }
+
+  getGreetingPlaybackSupport(item, providedVoices = null) {
+    if (!item) return 'unsupported';
+    if (item.audioUrl) return 'audio';
+    if (item.originalText && this.findMatchingVoice(item.langCode, providedVoices)) {
+      return 'speech';
+    }
+    return 'unsupported';
+  }
+
+  speakGreeting(text, langCode = 'en-US', onEnded = null) {
+    if (!text || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      if (onEnded) onEnded();
+      return { spoken: false, reason: 'speech-unavailable', voice: null };
+    }
+
+    const matchedVoice = this.findMatchingVoice(langCode);
+    if (!matchedVoice) {
+      // Never substitute English for an unsupported language
+      if (onEnded) this.scheduleTimer(onEnded, 950);
+      return { spoken: false, reason: 'no-matching-voice', voice: null };
+    }
+
+    try {
+      if (this._greetingSpeechTimer) {
+        clearTimeout(this._greetingSpeechTimer);
+        this._greetingSpeechTimer = null;
+      }
+      window.speechSynthesis.cancel();
+      this._greetingSpeechTimer = setTimeout(() => {
+        this._greetingSpeechTimer = null;
+        try {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.voice = matchedVoice;
+          utterance.lang = matchedVoice.lang || langCode;
+          utterance.rate = 0.94;
+          utterance.pitch = 1.0;
+          utterance.volume = this.isMuted ? 0 : Math.max(0, Math.min(1, this.currentVolume));
+
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            if (this._activeGreetingUtterance === utterance) {
+              this._activeGreetingUtterance = null;
+            }
+            if (onEnded) onEnded();
+          };
+          utterance.onend = finish;
+          utterance.onerror = finish;
+          this._activeGreetingUtterance = utterance;
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          if (onEnded) onEnded();
+        }
+      }, 45);
+      return { spoken: true, reason: 'ok', voice: matchedVoice };
+    } catch {
+      if (onEnded) onEnded();
+      return { spoken: false, reason: 'speech-error', voice: null };
+    }
+  }
+
+  /**
+   * Plays a single Voyager Golden Record greeting:
+   * 1. Authentic recording (`audioUrl`) if available
+   * 2. Native-language Web Speech API (`SpeechSynthesisUtterance`) if browser has a matching voice
+   * 3. Subtle harmonic chime + clear 'unsupported' status (never fake English speech)
+   */
+  playVoyagerGreetingItem(item, options = {}) {
+    const { onEnded = null } = options;
+    this.unlockSync();
+    this.stopActiveSequences();
+
+    if (!item) {
+      if (onEnded) onEnded();
+      return { mode: 'unsupported', voice: null };
+    }
+
+    // 1. Original 1977 recording segment (real human voice for this language)
+    if (item.audioUrl && typeof item.audioStart === 'number') {
+      this.playAudioSegment(item.audioUrl, item.audioStart, item.audioEnd, {
+        onEnded,
+        onError: () => {
+          // Recording unreachable (offline / blocked): fall back to native browser voice if one exists
+          const voice = this.findMatchingVoice(item.langCode);
+          if (voice && item.originalText) {
+            this.speakGreeting(item.originalText, item.langCode, onEnded);
+          } else if (onEnded) {
+            onEnded();
+          }
+        },
+      });
+      return { mode: 'audio', voice: null };
+    }
+
+    if (item.audioUrl) {
+      this.playStreamUrl(item.audioUrl, onEnded);
+      return { mode: 'audio', voice: null };
+    }
+
+    const matchedVoice = this.findMatchingVoice(item.langCode);
+    if (matchedVoice && item.originalText) {
+      this.speakGreeting(item.originalText, item.langCode, onEnded);
+      return { mode: 'speech', voice: matchedVoice };
+    }
+
+    // No authentic recording or matching browser voice: play subtle tonal cue only
+    if (!this.isMuted && this.ctx) {
+      this.playVoice(item.freq || 320, { type: 'sine', duration: 0.35, amp: 0.25, pan: 0 });
+    }
+    if (onEnded) {
+      this.scheduleTimer(onEnded, 950);
+    }
+    return { mode: 'unsupported', voice: null };
   }
 
   /**
@@ -556,6 +819,153 @@ class SonificationEngine {
       pan: 0,
       delaySend: 0.1,
     });
+  }
+
+  /**
+   * Generates distinct, instantly recognizable acoustic earcons via Web Audio.
+   * Ensures 100% audible feedback even when the OS has no TTS engine installed.
+   */
+  playEarcon(actionType = 'default') {
+    this.unlockSync();
+    if (this.isMuted) return;
+
+    try {
+      switch (actionType) {
+        case 'sonify':
+          // Radiant upward major arpeggio (C4 -> E4 -> G4 -> C5)
+          this.playVoice(261.63, { type: 'triangle', duration: 0.14, amp: 0.55, pan: -0.2, startOffset: 0 });
+          this.playVoice(329.63, { type: 'triangle', duration: 0.14, amp: 0.55, pan: 0, startOffset: 0.05 });
+          this.playVoice(392.00, { type: 'triangle', duration: 0.16, amp: 0.60, pan: 0.2, startOffset: 0.10 });
+          this.playFMVoice(523.25, { modRatio: 2, modIndex: 60, duration: 0.24, amp: 0.65, pan: 0, startOffset: 0.15 });
+          break;
+
+        case 'compare':
+          // Dual epoch shift: low baseline chord -> high anomaly chord
+          this.playVoice(220.00, { type: 'sine', duration: 0.18, amp: 0.60, pan: -0.3, startOffset: 0 });
+          this.playVoice(277.18, { type: 'triangle', duration: 0.18, amp: 0.55, pan: -0.2, startOffset: 0.02 });
+          this.playFMVoice(440.00, { modRatio: 2.5, modIndex: 85, duration: 0.28, amp: 0.70, pan: 0.3, startOffset: 0.12 });
+          break;
+
+        case 'scan':
+          // Planetary stereo sweep
+          this.playFMVoice(320, { modRatio: 1.5, modIndex: 50, duration: 0.18, amp: 0.55, pan: -0.5, startOffset: 0 });
+          this.playFMVoice(480, { modRatio: 2.0, modIndex: 70, duration: 0.20, amp: 0.60, pan: 0.5, startOffset: 0.08 });
+          break;
+
+        case 'calibrate':
+          // Chromatic scale reference chime
+          this.playVoice(349.23, { type: 'triangle', duration: 0.12, amp: 0.50, pan: -0.3, startOffset: 0 });
+          this.playVoice(440.00, { type: 'triangle', duration: 0.12, amp: 0.55, pan: 0, startOffset: 0.06 });
+          this.playVoice(554.37, { type: 'triangle', duration: 0.16, amp: 0.60, pan: 0.3, startOffset: 0.12 });
+          break;
+
+        case 'layer':
+          // Resonant glass timbre for scientific datasets
+          this.playFMVoice(659.25, { modRatio: 3.14, modIndex: 40, attack: 0.002, duration: 0.18, amp: 0.55, pan: 0 });
+          break;
+
+        case 'year':
+          // Sci-fi time jump ping
+          this.playVoice(587.33, { type: 'sine', duration: 0.12, amp: 0.50, pan: 0 });
+          break;
+
+        case 'region':
+          // Warm spatial marimba blip
+          this.playVoice(392.00, { type: 'sine', duration: 0.15, amp: 0.60, pan: 0 });
+          break;
+
+        case 'toggle':
+          // Crisp high-tech mechanical click-switch
+          this.playHudPing(1100);
+          break;
+
+        case 'hotspot':
+          // High radiant observatory bell
+          this.playFMVoice(1046.50, { modRatio: 2, modIndex: 30, duration: 0.22, amp: 0.65, pan: 0 });
+          break;
+
+        case 'close':
+          this.playVoice(220, { type: 'sine', duration: 0.12, amp: 0.40, pan: 0 });
+          break;
+
+        default:
+          this.playHudPing(940);
+          break;
+      }
+    } catch {
+      // AudioContext locked or in fallback
+    }
+  }
+
+  /**
+   * Accessible text-to-speech cue with Web Audio earcon fallback.
+   * Works 100% across all browsers, operating systems, and headless/Linux setups.
+   */
+  speakHoverCue(text, { lang = 'en-US', rate = 1.12, actionType = 'default' } = {}) {
+    if (!text) return;
+
+    // 1. Always play the Web Audio earcon signature first for guaranteed, instant sound!
+    this.playEarcon(actionType);
+
+    // 2. Schedule SpeechSynthesis safely (avoids Chrome cancel() collision & unpauses engine)
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        const synth = window.speechSynthesis;
+        if (synth.paused) {
+          synth.resume();
+        }
+
+        if (this._activeHoverTimer) {
+          clearTimeout(this._activeHoverTimer);
+          this._activeHoverTimer = null;
+        }
+
+        // Cancel previous speech, then defer speak by 35ms so Chromium IPC doesn't drop it
+        synth.cancel();
+        this._activeHoverTimer = setTimeout(() => {
+          this._activeHoverTimer = null;
+          try {
+            if (synth.paused) synth.resume();
+            const utt = new SpeechSynthesisUtterance(text);
+            utt.lang = lang;
+            utt.rate = rate;
+            utt.pitch = 1.0;
+            utt.volume = this.isMuted ? 0 : 0.95;
+
+            const voices = synth.getVoices() || [];
+            if (voices.length > 0) {
+              const enVoice = voices.find((v) => v.lang && v.lang.startsWith('en')) || voices[0];
+              if (enVoice) utt.voice = enVoice;
+            }
+
+            this._activeHoverUtterance = utt;
+            synth.speak(utt);
+          } catch {
+            // SpeechSynthesis fallback
+          }
+        }, 35);
+      } catch {
+        // SpeechSynthesis error
+      }
+    }
+  }
+
+  /**
+   * Immediately stops any active hover accessibility speech.
+   */
+  stopHoverSpeech() {
+    if (this._activeHoverTimer) {
+      clearTimeout(this._activeHoverTimer);
+      this._activeHoverTimer = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // ignore
+      }
+    }
+    this._activeHoverUtterance = null;
   }
 
   /**
@@ -872,6 +1282,58 @@ class SonificationEngine {
         });
         break;
       }
+    }
+  }
+
+  /**
+   * Sonifies the 2010–2026 Crisis Timeline slider:
+   * - 2010–2015 (CALM): warm major/fifth harmonic chord
+   * - 2016–2021 (WARMING): rising pitch + suspended tension
+   * - 2022–2026 (ANOMALY): sharp tritone dissonance + FM stress overtone
+   */
+  async playCrisisTimelineTone(year = 2026) {
+    const now = performance.now();
+    if (this._lastTimelineToneAt && now - this._lastTimelineToneAt < 65) return;
+    this._lastTimelineToneAt = now;
+
+    if (!this.ctx) {
+      this.init();
+    }
+    if (!this.ctx || this.isMuted) return;
+    if (this.ctx.state === 'suspended') {
+      await this.resume();
+    }
+
+    const crisisFactor = Math.max(0, Math.min(1, (year - 2010) / 16));
+    // Pitch rises from 220Hz (A3) in 2010 up to 440Hz (A4) in 2026
+    const baseFreq = 220 + crisisFactor * 220;
+
+    if (year < 2016) {
+      // Calm: pure sine root + perfect fifth
+      this.playVoice(baseFreq, { type: 'sine', duration: 0.24, amp: 0.36, pan: 0 });
+      this.playVoice(baseFreq * 1.5, { type: 'triangle', duration: 0.22, amp: 0.22, pan: 0, startOffset: 0.02 });
+    } else if (year < 2022) {
+      // Warming: triangle root + tense minor third / sus4 + light FM
+      this.playVoice(baseFreq, { type: 'triangle', duration: 0.24, amp: 0.38, pan: -0.15 });
+      this.playVoice(baseFreq * 1.334, { type: 'triangle', duration: 0.24, amp: 0.26, pan: 0.15, startOffset: 0.02 });
+      this.playFMVoice(baseFreq * 2, {
+        modRatio: 1.5,
+        modIndex: 35 + crisisFactor * 45,
+        duration: 0.2,
+        amp: 0.16,
+        pan: 0,
+      });
+    } else {
+      // Anomaly (2022-2026): sawtooth root + tritone (sqrt(2)) + harsh FM overtone
+      this.playVoice(baseFreq, { type: 'sawtooth', duration: 0.26, amp: 0.32, pan: -0.2 });
+      this.playVoice(baseFreq * 1.414, { type: 'sawtooth', duration: 0.26, amp: 0.28, pan: 0.2, startOffset: 0.015 });
+      this.playFMVoice(baseFreq * 2.5, {
+        modRatio: 2.1,
+        modIndex: 90 + crisisFactor * 90,
+        duration: 0.22,
+        amp: 0.22,
+        pan: 0,
+      });
     }
   }
 

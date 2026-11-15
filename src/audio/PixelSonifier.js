@@ -96,7 +96,11 @@ export function renderSvsCanvasLayer(
 
   const w = canvas.width;
   const h = canvas.height;
-  const yearFactor = Math.max(-0.22, Math.min(0.32, (year - 2016) * 0.025));
+  const clampedYear = Math.max(2010, Math.min(2026, Number(year) || 2024));
+  // Normalized year scale: 0.0 at 2010 baseline, 1.0 at 2026 crisis anomaly
+  const yearProgress = (clampedYear - 2010) / (2026 - 2010);
+  // Anomaly scale: baseline 2010 (0.58) -> 2018 (1.05) -> 2026 crisis anomaly (1.52)
+  const anomalyScale = 0.58 + yearProgress * 0.94;
 
   // 1. Base Real World Map (NASA BlueMarble_NextGeneration if loaded, else crisp Earth relief)
   ctx.clearRect(0, 0, w, h);
@@ -135,31 +139,43 @@ export function renderSvsCanvasLayer(
     drawContinentFills(ctx, w, h, 'rgba(30, 64, 98, 0.78)', 'rgba(125, 211, 252, 0.55)', 1.0);
   }
 
-  // 2. If live NASA GIBS scientific raster is available, composite it cleanly
+  // 2. If live NASA GIBS scientific raster is available, composite it with year-aware radiometric modulation
   if (dataOverlayImage && dataOverlayImage.complete && dataOverlayImage.naturalWidth > 0) {
     ctx.save();
-    ctx.globalAlpha = 0.85;
+    // Radiometric contrast & saturation modulation across epochs
+    const rasterAlpha = Math.max(0.60, Math.min(0.92, 0.65 + yearProgress * 0.25));
+    ctx.globalAlpha = rasterAlpha;
+
+    if (clampedYear >= 2022) {
+      ctx.filter = 'saturate(1.35) contrast(1.20) brightness(1.15)';
+    } else if (clampedYear <= 2014) {
+      ctx.filter = 'saturate(0.75) contrast(0.88) brightness(0.84)';
+    } else {
+      ctx.filter = 'none';
+    }
+
     ctx.drawImage(dataOverlayImage, 0, 0, w, h);
+    ctx.filter = 'none';
     ctx.restore();
-    drawContinentFills(ctx, w, h, 'transparent', 'rgba(186, 230, 253, 0.45)', 0.9);
-    return;
   }
 
-  // 3. Otherwise composite calibrated NASA SVS plume overlays transparently on top of continents
+  // 3. Composite calibrated NASA SVS plume overlays & anomaly hotspots transparently
   const hotspots = layer.hotspots || [];
   ctx.save();
   for (const hs of hotspots) {
     const cx = ((hs.lon + 180) / 360) * w;
     const cy = ((90 - hs.lat) / 180) * h;
-    const radPx = Math.max(12, (hs.radius / 180) * h * 1.45);
-    const adjStrength = Math.max(0.08, Math.min(1, hs.strength * (1 + yearFactor * 0.45)));
+    // Radius expands as anomalies and urbanization spread across epochs (2010 -> 2026)
+    const radPx = Math.max(12, (hs.radius / 180) * h * (1.05 + yearProgress * 0.85));
+    // Plume intensity scales with year anomaly
+    const adjStrength = Math.max(0.08, Math.min(1.0, hs.strength * anomalyScale));
 
     const [rPeak, gPeak, bPeak] = samplePaletteColor(adjStrength, layer);
     const [rMid, gMid, bMid] = samplePaletteColor(adjStrength * 0.52, layer);
 
     const grad = ctx.createRadialGradient(cx, cy, 1, cx, cy, radPx);
-    grad.addColorStop(0, `rgba(${rPeak}, ${gPeak}, ${bPeak}, 0.88)`);
-    grad.addColorStop(0.5, `rgba(${rMid}, ${gMid}, ${bMid}, 0.52)`);
+    grad.addColorStop(0, `rgba(${rPeak}, ${gPeak}, ${bPeak}, 0.90)`);
+    grad.addColorStop(0.5, `rgba(${rMid}, ${gMid}, ${bMid}, 0.55)`);
     grad.addColorStop(1, `rgba(${rMid}, ${gMid}, ${bMid}, 0)`);
 
     ctx.fillStyle = grad;
@@ -167,6 +183,17 @@ export function renderSvsCanvasLayer(
     ctx.arc(cx, cy, radPx, 0, Math.PI * 2);
     ctx.fill();
   }
+
+  // Atmospheric warming/anomaly tint across the planetary disk for recent crisis years
+  if (clampedYear >= 2022) {
+    const crisisAlpha = 0.05 + (clampedYear - 2022) * 0.025; // 0.05 to 0.15
+    ctx.fillStyle = `rgba(239, 68, 68, ${crisisAlpha.toFixed(3)})`;
+    ctx.fillRect(0, 0, w, h);
+  } else if (clampedYear <= 2013) {
+    ctx.fillStyle = 'rgba(14, 165, 233, 0.05)';
+    ctx.fillRect(0, 0, w, h);
+  }
+
   ctx.restore();
 
   // Crisp continent outlines over top for unmistakable readability

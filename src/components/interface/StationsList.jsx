@@ -1,65 +1,37 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, Disc, List, X, Flame, AlertTriangle } from 'lucide-react';
+import { Disc, List, X, Flame, AlertTriangle, Newspaper, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { NASA_STATIONS, TIMELINE_YEARS } from '../../data/nasaData';
+import {
+  EARTH_SIGNAL_NEWS_CARDS,
+  CLASSIFIED_CRISIS_DOSSIERS,
+  getDispatchForYear,
+} from '../../data/crisisTimelineData';
 import { useReceiverStore } from '../../store/useReceiverStore';
 import { audioEngine } from '../../audio/AudioEngine';
 import voyagerImg from '../../assets/record_voyager.jpeg';
 
 export default function StationsList() {
   const currentStationId = useReceiverStore((s) => s.currentStationId);
-  const setStation = useReceiverStore((s) => s.setStation);
   const isPlaying = useReceiverStore((s) => s.isPlaying);
-  const togglePlay = useReceiverStore((s) => s.togglePlay);
   const selectedYear = useReceiverStore((s) => s.selectedYear);
   const setSelectedYear = useReceiverStore((s) => s.setSelectedYear);
-  const invertPitch = useReceiverStore((s) => s.invertPitch);
   const setVoyagerModalOpen = useReceiverStore((s) => s.setVoyagerModalOpen);
 
   const [isMobileOpen, setMobileOpen] = useState(false);
-
-  const handleStationClick = (stationId) => {
-    audioEngine.unlockSync();
-    audioEngine.stopActiveSequences();
-
-    if (currentStationId === stationId) {
-      const nextPlaying = !isPlaying;
-      togglePlay();
-      if (nextPlaying) {
-        const pt = useReceiverStore.getState().getCurrentPoint();
-        audioEngine.playDataPoint(stationId, pt, {
-          invertPitch,
-          year: selectedYear,
-        });
-      }
-      return;
-    }
-
-    setStation(stationId);
-    useReceiverStore.setState({ isPlaying: true });
-    const targetStation = NASA_STATIONS.find((s) => s.id === stationId);
-    if (targetStation?.data?.[0]) {
-      audioEngine.playDataPoint(stationId, targetStation.data[0], {
-        invertPitch,
-        year: selectedYear,
-      });
-    }
-  };
+  const [expandedNewsId, setExpandedNewsId] = useState(EARTH_SIGNAL_NEWS_CARDS[0].id);
+  const [selectedDossierId, setSelectedDossierId] = useState(CLASSIFIED_CRISIS_DOSSIERS[0].id);
 
   const handleYearChange = (yr) => {
     audioEngine.unlockSync();
     setSelectedYear(yr);
-    const state = useReceiverStore.getState();
-    const pt = state.getCurrentPoint();
-    audioEngine.playDataPoint(state.currentStationId, pt, {
-      invertPitch,
-      year: yr,
-    });
+    audioEngine.playCrisisTimelineTone(yr);
   };
 
-  const voyagerStations = NASA_STATIONS.filter((s) => s.section === 'voyager');
-  const earthSignalStations = NASA_STATIONS.filter((s) => s.section === 'earthSignals');
-  const classifiedStations = NASA_STATIONS.filter((s) => s.section === 'classified');
+  const activeDispatch = getDispatchForYear(selectedYear);
+  const activeDossier =
+    CLASSIFIED_CRISIS_DOSSIERS.find((d) => d.id === selectedDossierId) ||
+    CLASSIFIED_CRISIS_DOSSIERS[0];
 
   const currentStation = NASA_STATIONS.find((s) => s.id === currentStationId) || NASA_STATIONS[0];
 
@@ -123,95 +95,93 @@ export default function StationsList() {
         {/* Scrollable 3-Section Dashboard Body */}
         <div className="p-2.5 space-y-3 overflow-y-auto custom-scrollbar flex-1">
           {/* Holographic Voyager Golden Record Banner inside Playlist (as in reference image) */}
-          <button
-            onClick={() => setVoyagerModalOpen(true)}
-            className="w-full y2k-lcd rounded-lg p-2 flex items-center gap-3 border border-cyan-400/35 hover:border-amber-400/70 transition-all cursor-pointer group"
-          >
-            <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-cyan-400/70 shadow-[0_0_12px_rgba(56,189,248,0.45)] bg-black">
-              <img
-                src={voyagerImg}
-                alt="Voyager Golden Record"
-                className={`w-full h-full object-cover rounded-full ${isPlaying ? 'animate-spin' : ''}`}
-                style={{ animationDuration: '10s' }}
-              />
-            </div>
-            <div className="text-left min-w-0 flex-1">
-              <div className="text-[10px] font-extrabold font-mono text-amber-300 uppercase tracking-wider truncate">
-                VOYAGER GOLDEN RECORD
-              </div>
-              <div className="text-[9px] font-mono text-cyan-300/90 truncate">
-                1977 INTERSTELLAR MESSAGE • CLICK TO OPEN
-              </div>
-            </div>
-          </button>
+         
+<button
+  onClick={() => setVoyagerModalOpen(true)}
+  aria-label="Explore the Voyager Golden Record"
+  className="
+    w-full y2k-lcd rounded-xl p-3
+    flex items-center gap-3
+    border border-cyan-400/50
+    bg-cyan-950/20
+    hover:border-amber-400
+    hover:bg-cyan-900/30
+    hover:shadow-[0_0_20px_rgba(251,191,36,0.18)]
+    hover:-translate-y-0.5
+    active:translate-y-0
+    transition-all duration-300
+    cursor-pointer group text-left
+  "
+>
+  {/* Voyager record artwork */}
+  <div className="
+    relative w-14 h-14 rounded-full overflow-hidden shrink-0
+    border-2 border-amber-400/80
+    shadow-[0_0_14px_rgba(251,191,36,0.3)]
+    bg-black
+    group-hover:border-amber-300
+    group-hover:shadow-[0_0_20px_rgba(251,191,36,0.55)]
+    transition-all duration-300
+  ">
+    <img
+      src={voyagerImg}
+      alt="Voyager Golden Record"
+      className={`w-full h-full object-cover rounded-full ${
+        isPlaying ? 'animate-spin' : ''
+      }`}
+      style={{ animationDuration: '10s' }}
+    />
+  </div>
 
-          {/* ── SECTION 1: VOYAGER RECORD (VOYAGER.REC) ── */}
-          <div>
-            <div className="flex items-center justify-between px-1 mb-1.5 border-b border-cyan-500/25 pb-1">
-              <span className="text-[10px] font-extrabold font-mono tracking-wider text-amber-300 uppercase">
-                SECTION 1: VOYAGER RECORD
-              </span>
-              <span className="text-[9px] font-mono text-slate-400">(VOYAGER.REC)</span>
-            </div>
+  {/* Text content */}
+  <div className="text-left min-w-0 flex-1">
+    <div className="
+      text-[11px] sm:text-xs font-extrabold font-mono
+      text-amber-300 uppercase tracking-wider truncate
+      group-hover:text-amber-200 transition-colors
+    ">
+      VOYAGER GOLDEN RECORD
+    </div>
 
-            <div className="space-y-1.5">
-              {voyagerStations.map((station) => {
-                const isActive = station.id === currentStationId;
-                return (
-                  <motion.button
-                    whileTap={{ scale: 0.985 }}
-                    key={station.id}
-                    onClick={() => {
-                      handleStationClick(station.id);
-                      if (window.innerWidth < 1024) setMobileOpen(false);
-                    }}
-                    className={`w-full group text-left flex items-center justify-between p-1.5 rounded-lg transition-all cursor-pointer ${
-                      isActive
-                        ? 'y2k-lcd border-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
-                        : 'y2k-metal-btn'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="relative w-11 h-7 rounded overflow-hidden shrink-0 border border-amber-500/40 bg-black">
-                        <img
-                          src={station.thumbnail}
-                          alt={station.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[11px] font-bold font-mono text-white truncate group-hover:text-amber-200">
-                          {station.name}
-                        </div>
-                        <div className="text-[9px] font-mono text-amber-300/80 truncate">
-                          {station.subtitle}
-                        </div>
-                      </div>
-                    </div>
+    <div className="
+      text-[9px] sm:text-[10px] font-mono
+      text-cyan-300/80 mt-1 truncate
+    ">
+      1977 • MESSAGE TO THE UNIVERSE
+    </div>
 
-                    <div
-                      className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ml-1.5 ${
-                        isActive ? 'y2k-gold-btn' : 'bg-slate-900/90 border border-slate-700 text-slate-300'
-                      }`}
-                    >
-                      {isActive && isPlaying ? (
-                        <Pause className="w-3 h-3 fill-current" />
-                      ) : (
-                        <Play className="w-3 h-3 fill-current ml-0.5" />
-                      )}
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
+    {/* Visible CTA */}
+    <div className="
+      inline-flex items-center gap-1.5 mt-2
+      px-2.5 py-1 rounded-md
+      bg-amber-400/15 border border-amber-400/50
+      text-amber-300 text-[9px] font-bold font-mono
+      tracking-widest uppercase
+      group-hover:bg-amber-400
+      group-hover:text-black
+      transition-all duration-300
+    ">
+      <span>EXPLORE RECORD</span>
+      <span className="text-xs">↗</span>
+    </div>
+  </div>
 
-          {/* ── SECTION 2: EARTH SIGNALS (EARTH.SIG 2010–2026) + TIMELINE SLIDER ── */}
+  {/* Right-side indicator */}
+  <div className="
+    shrink-0 text-cyan-400/60
+    group-hover:text-amber-300
+    group-hover:translate-x-1
+    transition-all duration-300
+  ">
+    <span className="text-xl">›</span>
+  </div>
+</button>
+
+          {/* ── SECTION 1: EARTH SIGNALS (EARTH.SIG 2010–2026) + TIMELINE SLIDER ── */}
           <div>
             <div className="flex items-center justify-between px-1 mb-1.5 border-b border-cyan-500/25 pb-1">
               <span className="text-[10px] font-extrabold font-mono tracking-wider text-cyan-300 uppercase">
-                SECTION 2: EARTH SIGNALS
+                SECTION 1: EARTH SIGNALS
               </span>
               <span className="text-[9px] font-mono text-cyan-400">(EARTH.SIG) 2010–2026</span>
             </div>
@@ -264,108 +234,191 @@ export default function StationsList() {
               </div>
             </div>
 
+            {/* Year-Synchronized Breaking Planetary Crisis News Card */}
+            <div className="y2k-lcd rounded-lg overflow-hidden border border-cyan-500/35 mb-2">
+              <div className="relative h-24 w-full bg-black">
+                <img
+                  src={activeDispatch.image}
+                  alt={activeDispatch.headline}
+                  loading="lazy"
+                  className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#040b16] via-[#040b16]/45 to-transparent" />
+                <div className="absolute top-1.5 left-1.5 flex items-center gap-1.5">
+                  <span className="px-1.5 py-0.5 rounded bg-black/80 border border-cyan-400/50 text-[8px] font-mono font-bold text-cyan-300 uppercase">
+                    {activeDispatch.badge}
+                  </span>
+                </div>
+                <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between gap-1">
+                  <span className="text-[9px] font-mono font-bold text-amber-300 truncate">
+                    {activeDispatch.metric}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-2 space-y-1.5">
+                <div className="flex items-start gap-1.5">
+                  <Newspaper className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                  <h3 className="text-[11px] font-extrabold font-mono text-white leading-snug">
+                    {activeDispatch.headline}
+                  </h3>
+                </div>
+                <p className="text-[10px] font-mono text-slate-300 leading-relaxed">
+                  {activeDispatch.summary}
+                </p>
+                <div className="pt-0.5 flex items-center justify-between text-[9px] font-mono">
+                  <span className="text-slate-400">SOURCE:</span>
+                  <a
+                    href={activeDispatch.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-cyan-300 hover:text-amber-300 underline underline-offset-2 transition-colors"
+                  >
+                    <span>{activeDispatch.sourceName}</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Earth Crisis News Briefings (Click to Read — No Music) */}
             <div className="space-y-1.5">
-              {earthSignalStations.map((station) => {
-                const isActive = station.id === currentStationId;
+              {EARTH_SIGNAL_NEWS_CARDS.map((item) => {
+                const isExpanded = item.id === expandedNewsId;
                 return (
-                  <motion.button
-                    whileTap={{ scale: 0.985 }}
-                    key={station.id}
-                    onClick={() => {
-                      handleStationClick(station.id);
-                      if (window.innerWidth < 1024) setMobileOpen(false);
-                    }}
-                    className={`w-full group text-left flex items-center justify-between p-1.5 rounded-lg transition-all cursor-pointer ${
-                      isActive
-                        ? 'y2k-lcd border-cyan-400 shadow-[0_0_12px_rgba(56,189,248,0.3)]'
+                  <div
+                    key={item.id}
+                    className={`rounded-lg transition-all overflow-hidden ${
+                      isExpanded
+                        ? 'y2k-lcd border border-cyan-400/70 shadow-[0_0_12px_rgba(56,189,248,0.2)]'
                         : 'y2k-metal-btn'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="relative w-10 h-7 rounded overflow-hidden shrink-0 border border-cyan-500/30 bg-black">
-                        <img
-                          src={station.thumbnail}
-                          alt={station.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                        <span className="absolute bottom-0 left-0 right-0 bg-black/75 text-[7px] font-mono text-cyan-300 text-center leading-tight">
-                          {station.code}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[11px] font-bold font-mono text-white truncate group-hover:text-cyan-200">
-                          {station.name}
-                        </div>
-                        <div className="text-[9px] font-mono text-slate-400 truncate">
-                          {station.subtitle}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ml-1.5 ${
-                        isActive ? 'y2k-aqua-btn' : 'bg-slate-900/90 border border-slate-700 text-slate-300'
-                      }`}
+                    <button
+                      type="button"
+                      onClick={() => setExpandedNewsId(isExpanded ? null : item.id)}
+                      aria-expanded={isExpanded}
+                      className="w-full group text-left flex items-center justify-between p-1.5 cursor-pointer"
                     >
-                      {isActive && isPlaying ? (
-                        <Pause className="w-3 h-3 fill-current" />
-                      ) : (
-                        <Play className="w-3 h-3 fill-current ml-0.5" />
-                      )}
-                    </div>
-                  </motion.button>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="relative w-10 h-7 rounded overflow-hidden shrink-0 border border-cyan-500/30 bg-black">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute bottom-0 left-0 right-0 bg-black/80 text-[6.5px] font-mono text-cyan-300 text-center leading-tight">
+                            {item.code}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[10.5px] font-bold font-mono text-white truncate group-hover:text-cyan-200">
+                            {item.title}
+                          </div>
+                          <div className="text-[9px] font-mono text-slate-400 truncate">
+                            {item.subtitle}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 ml-1.5 bg-slate-900/90 border border-slate-700 text-cyan-300">
+                        {isExpanded ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-2 pb-2 pt-1 border-t border-cyan-500/20 space-y-1.5">
+                        <p className="text-[9.5px] font-mono text-slate-300 leading-relaxed">
+                          {item.newsText}
+                        </p>
+                        <a
+                          href={item.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-cyan-300 hover:text-amber-300 underline underline-offset-2"
+                        >
+                          <span>Read report: {item.sourceName}</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* ── SECTION 3: CLASSIFIED SIGNALS (EARTH.DIS • 2026 CURRENT) ── */}
+          {/* ── SECTION 3: CLASSIFIED SIGNALS (PLANETARY CRISIS ARCHIVE • 2026) ── */}
           <div>
             <div className="flex items-center justify-between px-1 mb-1.5 border-b border-cyan-500/25 pb-1">
               <span className="text-[10px] font-extrabold font-mono tracking-wider text-orange-300 uppercase flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3 text-orange-400" />
-                <span>SECTION 3: CLASSIFIED SIGNALS</span>
+                <span>SECTION 2: CRISIS DOSSIERS</span>
               </span>
-              <span className="text-[9px] font-mono text-slate-400">2026 CURRENT</span>
+              <span className="text-[9px] font-mono text-slate-400">2026 REPORTS</span>
             </div>
 
             <div className="grid grid-cols-2 gap-1.5">
-              {classifiedStations.map((station) => {
-                const isActive = station.id === currentStationId;
+              {CLASSIFIED_CRISIS_DOSSIERS.map((dossier) => {
+                const isSelected = dossier.id === activeDossier.id;
                 return (
                   <motion.button
                     whileTap={{ scale: 0.98 }}
-                    key={station.id}
-                    onClick={() => {
-                      handleStationClick(station.id);
-                      if (window.innerWidth < 1024) setMobileOpen(false);
-                    }}
+                    key={dossier.id}
+                    type="button"
+                    onClick={() => setSelectedDossierId(dossier.id)}
                     className={`group text-left p-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                      isActive
+                      isSelected
                         ? 'y2k-lcd border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.3)]'
                         : 'y2k-metal-btn'
                     }`}
                   >
                     <div className="relative w-7 h-7 rounded overflow-hidden shrink-0 border border-cyan-500/30 bg-black">
                       <img
-                        src={station.thumbnail}
-                        alt={station.name}
+                        src={dossier.image}
+                        alt={dossier.title}
                         loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-[10px] font-bold font-mono text-white truncate">
-                        {station.name}
+                        {dossier.title}
                       </div>
                       <div className="text-[8px] font-mono text-cyan-300/80 truncate">
-                        ({station.code})
+                        {dossier.tag}
                       </div>
                     </div>
                   </motion.button>
                 );
               })}
+            </div>
+
+            {/* Active Dossier News Explanation + Source Link */}
+            <div className="mt-2 y2k-lcd p-2 rounded-lg border border-orange-400/30 space-y-1">
+              <div className="flex items-center justify-between text-[9px] font-mono">
+                <span className="font-bold text-orange-300 uppercase">
+                  {activeDossier.code} // {activeDossier.title}
+                </span>
+                <span className="text-amber-300">{activeDossier.tag}</span>
+              </div>
+              <p className="text-[9.5px] font-mono text-slate-300 leading-relaxed">
+                {activeDossier.explanation}
+              </p>
+              <a
+                href={activeDossier.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[9px] font-mono text-cyan-300 hover:text-amber-300 underline underline-offset-2"
+              >
+                <span>{activeDossier.sourceLabel}</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
             </div>
           </div>
         </div>
