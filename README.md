@@ -1,15 +1,34 @@
-[🇺🇸 Read in English](README.md) · [🇷🇺 Читать на русском](README_RU.md)
-
 # THE RECEIVER — NASA Earth Jukebox
 
-> **«Hear Earth. Decode the Signal.»**  
-> An interactive 3D interface and real-time multi-channel sonification suite built for the **NASA Space Apps Challenge** (**Earth Jukebox** challenge). The system transforms satellite observations from the **NASA Earth Information Center (EIC)**, authenticated **NASA SVS** repositories, and the historic **Voyager Golden Record (1977)** archive into a living, multi-voice planetary concert and universal science communication tool.
+<div align="center">
+
+[![NASA Space Apps Challenge 2026](https://img.shields.io/badge/NASA_Space_Apps-Earth_Jukebox-0B3D91?style=for-the-badge&logo=nasa&logoColor=white)](https://www.spaceappschallenge.org/)
+[![React 19](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Three.js](https://img.shields.io/badge/Three.js-WebGL_3D-black?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
+[![Web Audio API](https://img.shields.io/badge/Web_Audio_API-Native_DSP-purple?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+
+**[🇺🇸 English](README.md) • [🇷🇺 Русский (Полная документация)](README_RU.md) • [🌍 Руководство по карте](README_MAP_RU.md)**
+
+<p align="center">
+  <strong>«Hear Earth. Decode the Signal.»</strong><br>
+  <em>An interstellar auditory gateway translating 16 years of NASA Earth observations (2010–2026) and the 1977 Voyager Golden Record into living, real-time sound.</em>
+</p>
+
+</div>
 
 ---
 
-## 1. Executive Summary & Concept
+## 🌌 Overview
 
-The **Earth Jukebox** challenge calls for making complex Earth science intuitive, emotionally engaging, and universally accessible (especially to blind and visually impaired explorers) by **translating visual Earth Information Center (EIC) satellite data into dynamic real-time sonification**.
+**THE RECEIVER** is an interactive 3D WebGL experience and real-time multi-channel sonification suite developed for the **NASA Space Apps Challenge** (**Earth Jukebox** challenge).
+
+The project inverts humanity's classic space narrative:  
+In 1977, NASA launched Voyager 1 and 2 carrying the **Golden Record**—humankind's outbound greeting card to the stars.  
+**THE RECEIVER asks:** *What if an extraterrestrial intelligence intercepted the Golden Record and tuned their listening array toward Earth today?*
+
+Instead of an idyllic, static world, the celestial listener detects the planet's evolving environmental telemetry over the past 16 years (**2010–2026**). Visual satellite datasets from the **NASA Earth Information Center (EIC)** and **NASA Scientific Visualization Studio (SVS)** are transformed through computer vision into dynamic musical chords, stereo panning, and rhythmic percussion—creating an emotional and scientifically accurate auditory portal to our changing home.
 
 ```
                        [ INTERSTELLAR DEEP SPACE ]
@@ -19,187 +38,214 @@ The **Earth Jukebox** challenge calls for making complex Earth science intuitive
         1977 VOYAGER GOLDEN RECORD       2010–2026 EARTH OBSERVATIONS
       (Humankind's Outbound Signal)       (Planet's Inbound Telemetry)
       • 55 World Language Greetings       • 12 Official NASA SVS Datasets
-      • 27 Archival Music Traditions      • NASA GIBS Live Satellite Rasters
-      • Encoded Binary Analog Images      • 16-Year Climate Crisis Trajectory
+      • 27 Archival Music Traditions      • Live NASA GIBS Satellite Rasters
+      • 116 Encoded Analog Images         • 16-Year Crisis Anomaly Delta
                    │                               │
                    └───────────────┬───────────────┘
                                    ▼
                     THE RECEIVER DSP AUDIO ENGINE
-       • Computer Vision Pixel Matrix → NASA-IMPACT MIDI Chords (C1–A6)
+       • Computer Vision Matrix → NASA-IMPACT MIDI Chords (C1–A6)
        • Anomaly Density Detection → Chandra X-Ray Binary Drumming
-       • Dual-Engine Accessibility Reader (Web Audio Earcons + Voice)
+       • Universal Dual-Engine Audio Reader (Web Audio Earcons + Voice)
 ```
 
-### The Scientific & Narrative Framework
-In 1977, NASA launched Voyager 1 and 2 carrying a Golden Record—a time capsule of human goodwill, culture, and biodiversity destined for interstellar space.  
-**THE RECEIVER flips this narrative:** *What if an extraterrestrial intelligence intercepted the record and tuned their listening array toward Earth today?*  
-Instead of an idealized world, the celestial listener receives the planet's changing environmental telemetry across the last 16 years (2010–2026). The user transitions from the warm optimism of 1977 to the escalating sonic signatures of global warming, wildfire smoke plumes, ocean warming, and cryosphere contraction.
+---
+
+## ✨ Key Features
+
+### 🛰️ Real-Time NASA EIC World Map Sonifier (`WORLD MAP [W]`)
+* **Computer Vision on 2D Canvas**: Real-time pixel analysis across an equirectangular ($720 \times 360$ px, EPSG:4326) global projection.
+* **NASA-IMPACT Chord Mapping**: Direct translation of raw pixel luminance and optical density into 6 octaves of harmonic chords ($C_1$ to $A_6$) and dynamic MIDI velocities ($35$ to $127$).
+* **Chandra Binary Drumming**: Threshold-activated percussive sub-impulses triggered by high-energy anomalies (wildfires, optical lightning bursts, category 5 cyclone eyes).
+* **Binaural Spatial Panning**: True longitude-to-stereo localization (Western Hemisphere maps left, Eastern Hemisphere maps right).
+* **Planetary Meridian Sweep (`SCAN PLANET`)**: An orbital scanline traverses from west to east, converting the entire globe into a continuous planetary vinyl record.
+
+### 📈 16-Year Crisis Timeline Comparison (2010 vs 2026)
+* **A/B Acoustic Delta**: Compare baseline planetary conditions (2010) against modern crisis anomalies (2026) across 13 global geographic tipping points.
+* **Instant Delta Telemetry**: Quantifies shifts in chord register (e.g., $D_2\text{m} \to A_4\text{m}$), optical brightness percentage, and physical units with real-time audio playback.
+* **13 Geographic Focus Zones**: Tajikistan (Pamir Glaciers), Brazil (Amazon Basin), Arctic Cryosphere, Antarctica, Atlantic Hurricane Alley, United States, Europe, India, East Asia, and more.
+
+### 🪐 Interactive 3D Orbit (WebGL / Three.js)
+* **High-Fidelity 3D Earth**: Realistic axial tilt, atmospheric shader halo, and 3D floating hotspots that sonify geographic locations on click.
+* **Celestial Observer (The Alien)**: Interactive 3D listener entity tracking satellite orbits.
+* **Voyager Disc Turntable**: 3D interactive Golden Record with rotational physics and tracking tonearm.
+* **4 Cinematic Camera Presets**: `CAM 01: SCENE`, `CAM 02: ALIEN`, `CAM 03: DISC`, `CAM 04: HORIZON` with responsive framing across phones, tablets, and wide monitors.
+
+### 💿 Complete 1977 Voyager Golden Record Archive
+* **55 World Language Greetings**: All 55 verified official NASA greetings with original transcriptions, English translations, BCP-47 language codes, and historic 1977 audio streams.
+* **27 World Music Traditions**: Complete catalog from Bach and Chuck Berry to Navajo night chants, with local Web Audio synth playback, original Archive.org WAV streams, and integrated YouTube players.
+* **116 Encoded Analog Images**: Historic Apollo and Voyager calibration scans, diagrams, and photography with scanline sound sonification.
+
+### ♿ Universal Accessibility (A11y First)
+* **Global Hover Audio Reader (`HOVER [H]`)**: Master 1-click toggle for visually impaired researchers. Hovering or focusing (`Tab`) on any button, camera preset, station, or map coordinate speaks its function and plays a tuned Web Audio earcon.
+* **Dual-Engine Architecture**: Operates via Web Speech API with automatic fallback to pure W3C Web Audio earcons (`playEarcon`) on systems without native TTS packages (e.g., minimal Linux distributions).
+* **Live Visual Telemetry Banner**: Floating HUD subtitles `[AUDIO READER ACTIVE: ...]` duplicating spoken audio in real time.
+* **Multi-Modal Adaptations**: Keyboard-first navigation, pitch polarity inversion (`Invert Pitch`), high-contrast rendering, and reduced motion toggles.
 
 ---
 
-## 2. Interface Map & Control Layout
+## 🎮 Interface Map & Controls
 
-### Upper-Left Corner
-* **Camera Selector (`CAM 01: SCENE`, `CAM 02: ALIEN`, `CAM 03: DISC`, `CAM 04: HORIZON`)** — Smoothly shifts the 3D scene perspective (orbital overview, the alien listener, Voyager Golden Record turntable, Earth horizon).
-* **Receiver Core Module (`RECEIVER_CORE_SYS`)** — Located directly below camera controls; displays live signal lock (`SIGNAL LOCKED`), real-time audio oscilloscope activity, and the mission motto.
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ [CAM 01] [CAM 02] [CAM 03] [CAM 04]             EARTH STATION: NIGHT LIGHTS │
+│                                                                             │
+│ ┌──────────────────────┐                                                    │
+│ │ RECEIVER_CORE_SYS    │                     3D CELESTIAL SCENE             │
+│ │ ● SIGNAL LOCKED      │           (Interactive Earth, Alien & Turntable)   │
+│ │ THE RECEIVER         │                                                    │
+│ │ An auditory gateway. │                  [Hotspot: Pamir Glacier]          │
+│ └──────────────────────┘                                                    │
+│                                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ LCD: Station Telemetry Readout [WORLD MAP] │ [◄◄] [PLAY/PAUSE] [►►] │VOL│ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│      [HOVER (H)]  [DSP: ONLINE]  [TELEMETRY (E)]  [INVERT]  [KEY (D)]  [A11Y]     │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-### Center Screen (Interactive 3D Orbit)
-* **Interactive 3D Earth, Alien Listener, Orbiting Satellite & Voyager Turntable** — Full 3D rotation, tilt, and zoom via mouse or touch gestures.
-* **Floating 3D Hotspots (`Hotspot: Pamir Glacier`, `Hotspot: Thermal Anomaly`, `Hotspot: ISS-LIS Flash`)** — 1-click teleportation to planetary tipping points with immediate sonification playback.
-
-### Lower Center Panel (Compact Player)
-* **Status Telemetry Bar (`Instrument // Year // Status`)**:
-  * **`AUDIO: ON (TEST)` / `TAP: UNLOCK AUDIO`** — Unlocks the browser's Web Audio API context (overcoming browser autoplay restrictions) and plays an audible calibration test tone.
-  * **`LAT / LON` and `Hz (Note)`** — Real-time geographic coordinates and active sonification note.
-* **Station LCD Display** — Displays dataset name, current physical parameter value, and geographic zone.
-* **`27 TRACKS` Button (Gold)** — 1-click modal shortcut to the **World Music (27)** section of the Voyager Golden Record.
-* **`WORLD MAP [W]` Button (Cyan)** — Launches the interactive **NASA Worldview / SVS EIC Sonifier**, allowing cursor-driven planetary exploration through sound.
-* **Transport Controls (`SkipBack`, `PLAY / PAUSE`, `SkipForward`)** — Starts/stops automated planetary data scans or steps through coordinates manually.
-* **Spectrum Analyzer (`SPECTRA`) & Master Volume Slider / Mute**.
-* **Bottom Toolbar (`BottomToolbar`)**:
-  * `HOVER [H]` — Global 1-click toggle for the Dual-Engine Audio Reader mode for blind accessibility: speaks control functions and plays Web Audio earcons on hover or focus across all interface sections.
-  * `DSP` — Real-time audio engine health indicator.
-  * `TELEMETRY [E]` — Opens the tabular raw telemetry explorer (`DataExplorer`) across all station data points.
-  * `INVERT PITCH` — Reverses the pitch mapping logic (essential for comparative acoustic analysis and accessibility).
-  * `KEY [D]` — Opens the **Decoding Key Modal**, detailing the core physical mapping rules: `Pitch = Value`, `Rhythm = Intensity`, `Pan = Longitude`.
-  * `A11Y / KEYS` — Accessibility control center (high contrast, reduced motion, screen reader announcer, and full keyboard shortcut cheat sheet).
-
-### Right Panel (`EARTH STATIONS.PLS`)
-* **`ARCHIVE` Header Button & Banner** — Instant access to the complete Voyager Golden Record archive (`Greetings`, `Earth Sounds + Archive.org WAVs`, `World Music 27`, `Images 116`).
-* **`SECTION 1: VOYAGER RECORD`** — 4 historical Golden Record stations (`Greetings`, `Earth Sounds`, `Music of Earth`, `Images of Earth`).
-* **`SECTION 2: EARTH SIGNALS (2010–2026)`**:
-  * **`CRISIS TIMELINE LOG (2010–2026)` Slider** — Adjusts the active observation year, dynamically scaling climate anomaly severity and audio pitch expression.
-  * **12 NASA SVS Scientific Stations** (`Night Lights`, `Sea Surface Currents`, `Forest Height`, `Glacier Velocity`, `Lightning`, `Fire Locations`, `GEOS Aerosols & PM2.5`, `Carbon Dioxide CO₂`, `Atmospheric River`, `Sea Level 30Yr`, `Surface Air Temp`, `Wind & Cyclones`, `NOx & Ozone O₃`).
-* **`SECTION 3: CLASSIFIED / TELEMETRY`** — Secondary geophysical feeds (`Ocean Trenches & Seismic`, `Major River Flows`).
+* **`HOVER [H]`**: Master toggle for the global audio reader.
+* **`WORLD MAP [W]`**: Opens the NASA EIC World Map Sonifier canvas.
+* **`TELEMETRY [E]`**: Toggles the raw telemetry drawer and interactive melody bar chart.
+* **`KEY [D]`**: Opens the Voyager Decoding Matrix explaining physical wave mappings.
+* **`A11Y`**: Opens universal accessibility settings and keyboard shortcut guides.
+* **`AUDIO: ON (TEST)` / `TAP: UNLOCK AUDIO`**: Unlocks browser audio context and plays a test tone.
 
 ---
 
-## 2A. Jury Defense Guide: EIC World Map Sonifier (`WORLD MAP [W]`)
+## ⌨️ Keyboard Shortcuts
 
-> 📖 **Dedicated Map Documentation:** See the full technical breakdown in **[README_MAP_RU.md](README_MAP_RU.md)** (Russian) covering computer vision formulas, layer physics, and accessibility workflows.
-
-The World Map modal (`WorldMapModal`) is the project's central scientific and technological exhibit during judging. Here, real NASA satellite imagery is translated into sound in real time using computer vision (`PixelSonifier.js`).
-
-### 60–90 Second Live Jury Pitch Scenario
-
-1. **Launch the Sonifier:**  
-   Click `WORLD MAP [W]` in the player or press `W` on your keyboard.
-2. **Step 1 — Calibration Acoustic Legend (`CALIBRATE KEY` & Color Palette Stops):**  
-   Click `CALIBRATE KEY` or tap any color stop at the bottom legend. Explain to the jury: *«A visually impaired researcher first hears the acoustic legend—learning what a baseline atmosphere sounds like versus an extreme environmental anomaly.»*
-3. **Step 2 — Blind Accessibility Mode (`HOVER AUDIO: ON` + `VOICE: ON`):**  
-   * **Map Hover:** As the cursor sweeps the map ($720 \times 360$ EPSG:4326), each pixel immediately triggers a harmonic chord (NASA-IMPACT scale $C_1$ to $A_6$), stereo positioning (`LEFT / CENTER / RIGHT` based on longitude), and a Chandra Binary percussion beat.
-   * **Off-Map Hover & Navigation:** Enabling `VOICE: ON` provides instant spoken announcements and tuned audio earcons on hover/focus (Tab) for all UI controls—SVS layer buttons, region presets, map hotspots, player controls, camera angles, and playlist stations.
-4. **Step 3 — Regional & Temporal Comparison (`Region` + `SONIFY REGION` + `COMPARE`):**  
-   * Select a region (e.g., *Tajikistan (Pamir)*, *Brazil / Amazon*, *China / East Asia*, *Arctic Cryosphere*, or *Antarctica / Southern Ocean*—13 presets total) and click `SONIFY REGION` to hear its acoustic signature.
-   * Click `COMPARE 2012 ↔️ 2024` (or `2010 ↔️ 2026`): the system automatically plays the auditory delta between both years, displaying the exact percentage shift and chord transition (`Chord: A3min → E2min, Velocity`).
-5. **Step 4 — Live Planetary Sweep (`SCAN PLANET`):**  
-   Engage `SCAN PLANET`: a luminous vertical meridian traverses westward to eastward across the globe, transforming the entire planet into a continuous, multi-voice Earth Jukebox.
-
-### Real-Time Computer Vision → Sound Mapping Formula
-* **RGB Energy Split** — Spectral distribution of red, green, and blue optical channels in the sampled region.
-* **Brightness → Velocity (35–127)** — Pixel luminance and optical density directly modulate MIDI velocity dynamics.
-* **Spike Density → Drum (BEAT 0 / 1)** — Threshold detector triggers Chandra X-Ray percussion pulses on high-energy anomalies (lightning, fire fronts, storm eyes).
-* **NASA-IMPACT Chord & Stereo Pan** — Final chord voicing mapped along longitude coordinates from left to right ear.
+| Shortcut | Action |
+| :---: | :--- |
+| <kbd>Space</kbd> | Toggle sonification scan (**Play / Pause**) |
+| <kbd>→</kbd> / <kbd>←</kbd> | Advance to **Next / Previous** data observation point |
+| <kbd>H</kbd> | Toggle **Global Hover Audio Reader** (Voice + Earcons) |
+| <kbd>W</kbd> | Toggle **NASA EIC World Map Sonifier** modal |
+| <kbd>E</kbd> / <kbd>T</kbd> | Toggle **Data Explorer** drawer and melody chart |
+| <kbd>D</kbd> | Toggle **Voyager Decoding Matrix** modal |
+| <kbd>M</kbd> | **Mute / Unmute** master audio output |
+| <kbd>C</kbd> | Cycle through **3D Camera Presets** (Scene $\to$ Alien $\to$ Disc $\to$ Horizon) |
+| <kbd>1</kbd> – <kbd>7</kbd> | Instant shortcut to active Earth stations |
+| <kbd>Esc</kbd> | Close all open modals and return to 3D orbit |
 
 ---
 
-## 3. Browser & Operating System Compatibility Matrix
+## 🔬 Scientific Datasets & Data Sources
 
-| Feature / Subsystem | Google Chrome / Chromium | Mozilla Firefox | Apple Safari (macOS / iOS) | Microsoft Edge | Linux (Parrot / Debian / Ubuntu) | Android Chrome |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **WebGL 3D Earth & Models** | **100%** | **100%** | **100%** | **100%** | **100%** | **100%** |
-| **Web Audio API DSP Synthesis** | **100%** | **100%** | **100%** (Tap to unlock) | **100%** | **100%** | **100%** (Tap to unlock) |
-| **Audio Reader: Web Audio Earcons** | **100%** | **100%** | **100%** | **100%** | **100%** | **100%** |
-| **Audio Reader: Native Robotic Voice** | **100%** (Built-in) | **100%** (Built-in) | **100%** (Built-in) | **100%** (Built-in) | Requires `speech-dispatcher` | **100%** (Built-in) |
-| **Screen Reader ARIA Live Region** | **100%** | **100%** | **100%** | **100%** | **100%** (via Orca) | **100%** (TalkBack) |
-| **Voyager 55 Archival Audio Streams** | **100%** | **100%** | **100%** | **100%** | **100%** | **100%** |
-| **NASA GIBS Live WMS Satellite Overlays**| **100%** | **100%** | **100%** | **100%** | **100%** | **100%** |
-| **YouTube Archival Music Player** | **100%** | **100%** | **100%** | **100%** | **100%** | **100%** |
+All sonifications are mapped to authenticated scientific repositories from the **NASA Earth Information Center (EIC)** and **NASA Scientific Visualization Studio (SVS)**:
 
-### Why Did Speech Synthesis Behave Differently on Linux?
-* **Windows / macOS / Android**: Operating systems bundle rich native text-to-speech engines (SAPI, Apple Siri/Alex, Google TTS) accessible by browsers immediately.
-* **Specialized Linux (Parrot OS, Kali, Minimal Debian)**: Security distributions deliberately omit `speech-dispatcher` and `espeak-ng` to reduce daemon overhead.
-* **Our Engineering Solution — Dual-Engine Audio Reader:**
-  1. **Primary Voice Channel:** Standard Web Speech API when operating system voices exist.
-  2. **Fail-Safe Web Audio Earcon Synthesizer (`playEarcon`):** A zero-dependency, pure W3C Web Audio API synthesis engine generating distinct, melodic earcon motifs for every system action (`sonify`, `compare`, `scan`, `calibrate`, `layer`, `year`, `hotspot`). Guaranteed 100% operational on every browser and OS offline.
-  3. **Visual Real-Time Feedback:** A luminous `[AUDIO READER ACTIVE]` HUD banner broadcasting spoken telemetry in real time.
+| Dataset ID | Scientific Mission & Instrument | Physical Metric | Scale Range |
+| :--- | :--- | :--- | :--- |
+| **NASA SVS #5313** | Suomi NPP VIIRS Day/Night Band | Nighttime Lights & Urban Grids | 0 – 140 nW/cm²/sr |
+| **NASA SVS #5153** | Terra MOPITT & GEOS-FP Plumes | Carbon Monoxide Wildfires (CO) | 0 – 480 ppbv |
+| **NASA SVS #3912** | ECCO2 & MUR GHRSST Altimetry | Sea Surface Currents & Temperatures | -2°C – +34°C |
+| **NASA SVS #5669** | Suomi NPP OMPS Aerosol Suite | Aerosols & Particulate Matter (PM2.5) | 0 – 5.5 UVAI |
+| **NASA SVS #5196** | Aqua AIRS Free Troposphere Model | DYAMOND Carbon Dioxide (CO₂) | 385 – 430 ppm |
+| **NASA SVS #5011** | ISS-LIS Spaceborne Optical Sensor | Global Lightning Flash Density | 0 – 65 flashes/km²/yr |
+| **NASA SVS #4960** | GPM IMERG Microwave Constellation| Precipitation & Atmospheric Rivers | 0 – 45 mm/hr |
+| **NASA SVS #4950** | ISS GEDI Spaceborne Lidar | Forest Canopy Height & Biomass | 0 – 62 m |
+| **NASA SVS #5533** | Sentinel-6, Jason-1/2/3, TOPEX | 30 Years of Sea Level Anomalies | -180 – +220 mm |
+| **NASA SVS #5147** | GEOS-FP Atmosphere Reanalysis | Global Surface Air Temperature | -45°C – +48°C |
+| **NASA SVS #5148** | GEOS-FP Near-Surface Wind Vector | Tropical Cyclones & Wind Speed | 0 – 68 m/s (Cat 5) |
+| **NASA SVS #5154** | Aura OMI UV/Visible Spectrometer | Nitrogen Dioxide (NO₂) & Ozone (O₃) | 0 – 24 × 10¹⁵ mol/cm² |
 
----
-
-## 4. Formal Evaluation & Grade (NASA Hackathon Judge / Team Lead Perspective)
-
-### How Effectively Does the Project Solve the Challenge?
-**Verdict: Outstanding Finalist / Winning Contender.**
-
-| Evaluation Criteria | Max Score | Awarded | Judge's Comments |
-| :--- | :---: | :---: | :--- |
-| **1. Scientific Accuracy & NASA Data** | 20 | **20** | Grounded in 12 authenticated NASA SVS datasets with explicit IDs, live NASA GIBS WMS rasters, authentic units, and NASA-IMPACT sonification rules. |
-| **2. Accessibility & Universal Design** | 20 | **19** | Exceptional dual-engine audio reader. Sonifies raw pixels, speaks button controls, provides fail-safe Web Audio earcons, and maintains ARIA live regions for screen readers. |
-| **3. Technical Architecture & Stability** | 20 | **19** | Decoupled React 19 + Three.js + Zustand pipeline. Passes ESLint with 0 errors and 0 warnings. Blazing ~2.0s production build. Resilient Web Audio lifecycle handling. |
-| **4. Storytelling, Concept & Creativity** | 20 | **20** | Gripping emotional dichotomy: 1977 Voyager Golden Record (human optimism) vs. 2010–2026 Crisis Sonification (planetary distress). Masterful celestial listener framing. |
-| **5. UI / UX & Production Polish** | 20 | **18** | Immersive Y2K retro-futuristic aesthetic, responsive HUD bounds without overlapping panels, interactive 3D turntable, and detailed mathematical telemetry overlays. |
-| **TOTAL SCORE** | **100** | **96 / 100** | **Grade: A+ (Honorable NASA Finalist Quality)** |
-
-### Team Lead Pre-Flight Checklist Before Presentation
-- [ ] **Audio Initialization:** Upon loading the app, click `TAP: UNLOCK AUDIO` or `PLAY` once to unlock the browser's `AudioContext`.
-- [ ] **Network & Ad-Blocker Verification:** Ensure local hackathon network allows external streams (Archive.org WAVs and YouTube embeds), noting that the core sonification synthesizer is 100% autonomous and functions completely offline.
-- [ ] **Screen Resolution Check (`1280×720` & `1920×1080`):** Confirm that the 3D scene, receiver core card, compact player, and right station playlist fit comfortably without clipping on external projectors.
-- [ ] **Clean Build Verification:** Run `npm run lint && npm run build` prior to the pitch.
-
-### Post-Hackathon Roadmap
-1. **MIDI & High-Resolution WAV Export** — Enable researchers, educators, and musicians to export regional sonification audio stems into professional DAW software.
-2. **Server-Side NASA GIBS Proxy Cache** — Edge-cached satellite tiles to eliminate browser CORS limitations and accelerate historic raster lookups.
-3. **Automated Museum Audio Tour Mode** — Hands-free 5-minute spatial audio walk through all 12 climate zones for science centers and planetariums.
+* **NASA GIBS WMS**: EPSG:4326 Equirectangular raster imagery (`BlueMarble_NextGeneration`, `VIIRS_Black_Marble_Nighttime_Lights_2016`, `MOPITT_CO_Monthly_Total_Column_Day`, `GHRSST_L4_MUR_Sea_Surface_Temperature`, etc.).
+* **NASA Voyager Archives**: Historic audio streams and telemetry sourced from [NASA Voyager Official Repository](https://science.nasa.gov/mission/voyager/) and [Archive.org](https://archive.org/details/Voyager1).
 
 ---
 
-## 5. NASA Datasets & Verified Scientific Sources
+## 🎵 Sonification Physics & Mathematics
 
-### NASA Scientific Visualization Studio (SVS)
-* **NASA SVS #5313**: *Change in Night Lights (2012–2023)* — Suomi NPP VIIRS Day/Night Band.
-* **NASA SVS #5153 / #5533**: *Carbon Monoxide (CO)* — Terra MOPITT & GEOS-FP wildfire atmospheric plumes.
-* **NASA SVS #3912 / #5425**: *Sea Surface Temperature & Currents* — ECCO2 / MUR GHRSST ocean circulation.
-* **NASA SVS #5669 / #5151**: *Aerosol Index (UVAI)* — Suomi NPP OMPS dust storms and biomass burning.
-* **NASA SVS #5196**: *DYAMOND Global Carbon Dioxide (CO₂)* — Free-troposphere carbon circulation model.
-* **NASA SVS #5011**: *Optical Lightning Flashes* — ISS-LIS spaceborne optical sensor.
-* **NASA SVS #4960 / #5149**: *Global Precipitation Rate* — GPM IMERG atmospheric rivers and severe weather.
-* **NASA SVS #4950**: *Canopy Height & Biomass* — ISS GEDI spaceborne laser altimeter.
-* **NASA SVS #5533**: *30 Years of Sea Surface Height* — TOPEX/Poseidon, Jason-1/2/3, and Sentinel-6 radar altimetry.
-* **NASA SVS #5147**: *Global Surface Air Temperature* — GEOS-FP surface heatwave reanalysis.
-* **NASA SVS #5148 / #5072**: *Near-Surface Wind Speed & Cyclones* — GEOS-FP tropical storm wind vectors.
-* **NASA SVS #5154 / #5152**: *Nitrogen Dioxide (NO₂) & Surface Ozone (O₃)* — Aura OMI industrial emissions.
+The audio synthesis pipeline is implemented in [`src/audio/PixelSonifier.js`](src/audio/PixelSonifier.js) and [`src/audio/AudioEngine.js`](src/audio/AudioEngine.js) using the native **W3C Web Audio API**:
 
-### NASA GIBS (Global Imagery Browse Services)
-* **WMS Standard**: EPSG:4326 Equirectangular Projection.
-* **Layers**: `BlueMarble_NextGeneration`, `VIIRS_Black_Marble_Nighttime_Lights_2016`, `MOPITT_CO_Monthly_Total_Column_Day`, `GHRSST_L4_MUR_Sea_Surface_Temperature`, `OMPS_Aerosol_Index`, `AIRS_CO2_Monthly_Free_Troposphere_Day`, `MODIS_Terra_NDVI_8Day`.
+### 1. Optical Luminance Calculation
+$$L = 0.299 \cdot R + 0.587 \cdot G + 0.114 \cdot B$$
 
-### Historical Voyager Golden Record Archive
-* [NASA Voyager Golden Record — Sounds of Earth](https://science.nasa.gov/mission/voyager/golden-record-contents/sounds/)
-* [NASA Voyager-1 Mission Overview](https://science.nasa.gov/mission/voyager/voyager-1/)
-* [Archive.org — Voyager-1 Launch Commentary WAV](https://archive.org/details/Voyager1/Voyager-1_Launch_Commentary.wav)
-* [Archive.org — Voyager Golden Record 495-AAB (8m10s) WAV](https://archive.org/details/Voyager1/495-AAB_8min10sec.wav)
+### 2. Velocity Mapping (NASA-IMPACT Standard)
+Normalized intensity maps directly to standard MIDI velocity dynamics ($35$ to $127$):
+$$\text{Velocity} = 35 + \text{NormalizedIntensity} \times (127 - 35)$$
+
+### 3. Harmonic Pitch Scale (MIDI $C_1$ to $A_6$)
+Frequencies are calculated from MIDI notes $m \in [24 \dots 93]$ across 6 octaves:
+$$f(m) = 440 \times 2^{\frac{m - 69}{12}} \text{ Hz}$$
+
+### 4. Chandra X-Ray Binary Drumming
+Whenever pixel anomaly spike density surpasses the layer's calibrated threshold ($\text{Density} \ge 0.56$), a percussive sub-impulse fires, introducing a rhythmic heartbeat for extreme phenomena.
+
+### 5. Longitude Panning
+$$\text{Pan} = \frac{\text{Longitude}}{180} \in [-1.0 \dots +1.0]$$
 
 ---
 
-## 6. Technology Stack & Quick Start
+## 🛠️ Technology Stack
 
-| Category | Library / Technology | Purpose |
+| Layer | Tools & Libraries | Purpose |
 | :--- | :--- | :--- |
-| **Frontend Framework** | React 19 (`^19.3.1`) | High-performance reactive component architecture |
-| **Bundler & Tooling** | Vite (`^8.3.6`) | Sub-second HMR and optimized production bundling |
-| **3D Graphics & Engine** | Three.js + React Three Fiber / Drei | WebGL globe, orbital paths, and 3D vinyl turntable |
-| **Audio & Sonification** | W3C Web Audio API + Tone.js | Native zero-latency DSP synthesis, sound mapping, earcons |
-| **State Management** | Zustand (`^5.1.0`) | Lightweight unified store for telemetry and playback state |
-| **Styling & Animation** | Tailwind CSS v4 + Framer Motion | Cybernetic Y2K HUD aesthetic, fluid modal transitions |
-| **Quality Assurance** | ESLint (`^10.14.0`) | Strict static code analysis (0 errors, 0 warnings) |
+| **UI Framework** | React 19 (`^19.3.1`) | High-performance reactive state & component tree |
+| **Tooling & Build** | Vite (`^8.3.6`) | Sub-second HMR and production bundling |
+| **3D Graphics** | Three.js + React Three Fiber / Drei | WebGL globe, orbital satellites, and vinyl turntable |
+| **Audio Core** | Native W3C Web Audio API + Tone.js | Modular polyphonic DSP synthesis, earcons, spatial panning |
+| **State Store** | Zustand (`^5.1.0`) | Lightweight, centralized telemetry store |
+| **Styling & Motion** | Tailwind CSS v4 + Framer Motion | Cybernetic HUD aesthetic, responsive layouts, fluid modals |
+| **Icons** | Lucide React | Clean, scalable aerospace iconography |
+| **Code Quality** | ESLint (`^10.14.0`) | Zero errors, zero warnings static verification |
 
-### Local Development Setup
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+* **Node.js**: v18.0.0 or higher
+* **npm**: v9.0.0 or higher
+
+### Installation
+
 ```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/the-receiver.git
+cd the-receiver
+
+# 2. Install dependencies
 npm install
+
+# 3. Start local development server
 npm run dev
 ```
 
-### Production Build & Linting Verification
+Open your browser at `http://localhost:5173` to explore.
+
+### Production Build & Linting
+
 ```bash
-npm run lint && npm run build
+# Run ESLint validation
+npm run lint
+
+# Build production bundle
+npm run build
+
+# Preview production build locally
+npm run preview
 ```
+
+---
+
+## 📱 Responsive Device Support
+
+THE RECEIVER features an adaptive layout calibrated for:
+* **Mobile Phones** ($320\text{px} \dots 640\text{px}$): Stacked audio deck, touch canvas controls, compact mobile camera bar (`CAM 01–04`), and touch-dismissible drawers.
+* **Tablets & Phablets** ($640\text{px} \dots 1024\text{px}$): Dual-pane responsive view with visible 3D hotspots.
+* **Laptops & Desktops** ($1280\times720 \dots 1920\times1080$): Full HUD frame with integrated spectrogram, side dashboard, and camera controls.
+* **Ultra-Wide & 4K Displays** ($> 1920\text{px}$): High-density telemetry displays with uncompressed layouts.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+  <sub>Built with passion for the NASA Space Apps Challenge 2026 • Earth Jukebox Challenge</sub><br>
+  <sub><strong>«In every transmission from Earth, the music continues.»</strong></sub>
+</div>
